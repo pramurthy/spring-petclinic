@@ -28,6 +28,8 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import jakarta.validation.Valid;
 
@@ -43,6 +45,8 @@ class PetController {
 	private static final String VIEWS_PETS_CREATE_OR_UPDATE_FORM = "pets/createOrUpdatePetForm";
 
 	private final OwnerRepository owners;
+
+	Logger logger = LoggerFactory.getLogger(PetController.class);
 
 	public PetController(OwnerRepository owners) {
 		this.owners = owners;
@@ -79,6 +83,7 @@ class PetController {
 		Pet pet = new Pet();
 		owner.addPet(pet);
 		model.put("pet", pet);
+		logger.info("Query success called GET /pets/new");
 		return VIEWS_PETS_CREATE_OR_UPDATE_FORM;
 	}
 
@@ -95,6 +100,7 @@ class PetController {
 		}
 
 		this.owners.save(owner);
+		logger.info("Query success called POST /pets/new");
 		return "redirect:/owners/{ownerId}";
 	}
 
@@ -102,6 +108,7 @@ class PetController {
 	public String initUpdateForm(Owner owner, @PathVariable("petId") int petId, ModelMap model) {
 		Pet pet = owner.getPet(petId);
 		model.put("pet", pet);
+		logger.info("Query success called GET /pets/{petId}/edit");
 		return VIEWS_PETS_CREATE_OR_UPDATE_FORM;
 	}
 
@@ -114,6 +121,7 @@ class PetController {
 
 		owner.addPet(pet);
 		this.owners.save(owner);
+		logger.info("Query success called POST /pets/{petId}/edit");
 		return "redirect:/owners/{ownerId}";
 	}
 

@@ -17,6 +17,8 @@ package org.springframework.samples.petclinic.system;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Controller used to showcase what happens when an exception is thrown
@@ -28,8 +30,11 @@ import org.springframework.web.bind.annotation.GetMapping;
 @Controller
 class CrashController {
 
+	Logger logger = LoggerFactory.getLogger(CrashController.class);
+
 	@GetMapping("/oups")
 	public String triggerException() {
+		logger.info("Query success called GET /oups");
 		throw new RuntimeException(
 				"Expected: controller used to showcase what " + "happens when an exception is thrown");
 	}
