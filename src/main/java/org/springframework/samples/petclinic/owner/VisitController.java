@@ -25,6 +25,8 @@ import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import jakarta.validation.Valid;
 
@@ -39,6 +41,8 @@ import jakarta.validation.Valid;
 class VisitController {
 
 	private final OwnerRepository owners;
+
+	Logger logger = LoggerFactory.getLogger(VisitController.class);
 
 	public VisitController(OwnerRepository owners) {
 		this.owners = owners;
@@ -74,6 +78,7 @@ class VisitController {
 	// called
 	@GetMapping("/owners/{ownerId}/pets/{petId}/visits/new")
 	public String initNewVisitForm() {
+		logger.info("Query success called GET /owners/*/pets/{petId}/visits/new");
 		return "pets/createOrUpdateVisitForm";
 	}
 
@@ -88,6 +93,7 @@ class VisitController {
 
 		owner.addVisit(petId, visit);
 		this.owners.save(owner);
+		logger.info("Query success called POST /owners/{ownerId}/pets/{petId}/visits/new");
 		return "redirect:/owners/{ownerId}";
 	}
 

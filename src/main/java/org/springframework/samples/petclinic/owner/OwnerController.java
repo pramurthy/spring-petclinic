@@ -32,6 +32,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import jakarta.validation.Valid;
 
@@ -47,6 +49,8 @@ class OwnerController {
 	private static final String VIEWS_OWNER_CREATE_OR_UPDATE_FORM = "owners/createOrUpdateOwnerForm";
 
 	private final OwnerRepository owners;
+
+	Logger logger = LoggerFactory.getLogger(OwnerController.class);
 
 	public OwnerController(OwnerRepository clinicService) {
 		this.owners = clinicService;
@@ -66,6 +70,7 @@ class OwnerController {
 	public String initCreationForm(Map<String, Object> model) {
 		Owner owner = new Owner();
 		model.put("owner", owner);
+		logger.info("Query success called GET /owners/new");
 		return VIEWS_OWNER_CREATE_OR_UPDATE_FORM;
 	}
 
@@ -76,11 +81,13 @@ class OwnerController {
 		}
 
 		this.owners.save(owner);
+		logger.info("Query success called POST /owners/new");
 		return "redirect:/owners/" + owner.getId();
 	}
 
 	@GetMapping("/owners/find")
 	public String initFindForm() {
+		logger.info("Query success called GET /owners/find");
 		return "owners/findOwners";
 	}
 
@@ -103,6 +110,7 @@ class OwnerController {
 		if (ownersResults.getTotalElements() == 1) {
 			// 1 owner found
 			owner = ownersResults.iterator().next();
+			logger.info("Query success called GET /owners");
 			return "redirect:/owners/" + owner.getId();
 		}
 
@@ -130,6 +138,7 @@ class OwnerController {
 	public String initUpdateOwnerForm(@PathVariable("ownerId") int ownerId, Model model) {
 		Owner owner = this.owners.findById(ownerId);
 		model.addAttribute(owner);
+		logger.info("Query success called GET /owners/{ownerId}/edit");
 		return VIEWS_OWNER_CREATE_OR_UPDATE_FORM;
 	}
 
@@ -142,6 +151,7 @@ class OwnerController {
 
 		owner.setId(ownerId);
 		this.owners.save(owner);
+		logger.info("Query success called POST /owners/{ownerId}/edit");
 		return "redirect:/owners/{ownerId}";
 	}
 
