@@ -70,24 +70,28 @@ class OwnerController {
 	public String initCreationForm(Map<String, Object> model) {
 		Owner owner = new Owner();
 		model.put("owner", owner);
-		logger.info("Query success called GET /owners/new");
+		logger.info("GET /owners/new - Request recieved"); 
+		logger.info("Create or Update form rendered");
 		return VIEWS_OWNER_CREATE_OR_UPDATE_FORM;
 	}
 
 	@PostMapping("/owners/new")
 	public String processCreationForm(@Valid Owner owner, BindingResult result) {
 		if (result.hasErrors()) {
+			logger.error("Error in creating new owner");
 			return VIEWS_OWNER_CREATE_OR_UPDATE_FORM;
 		}
 
 		this.owners.save(owner);
-		logger.info("Query success called POST /owners/new");
+		logger.info("New owner with owner id :" + owner.getId() + " created and added to database successfully");
+		logger.info("Fetching new owner details from db - /owners/" + owner.getId());
 		return "redirect:/owners/" + owner.getId();
 	}
 
 	@GetMapping("/owners/find")
 	public String initFindForm() {
-		logger.info("Query success called GET /owners/find");
+		logger.info("GET /owners/find - Request called");
+		logger.info("Find owner page is requested");
 		return "owners/findOwners";
 	}
 
@@ -104,13 +108,16 @@ class OwnerController {
 		if (ownersResults.isEmpty()) {
 			// no owners found
 			result.rejectValue("lastName", "notFound", "not found");
+			logger.info("No owners found in database");
+			logger.info("Redirecting to find owner page");
 			return "owners/findOwners";
 		}
-
+		logger.info("Number of owners in the database: " + ownersResults.getTotalElements());
 		if (ownersResults.getTotalElements() == 1) {
 			// 1 owner found
 			owner = ownersResults.iterator().next();
-			logger.info("Query success called GET /owners");
+			logger.info("GET /owners - Request called");
+			logger.info("Redirecting to /owners/" + owner.getId());
 			return "redirect:/owners/" + owner.getId();
 		}
 
@@ -138,7 +145,8 @@ class OwnerController {
 	public String initUpdateOwnerForm(@PathVariable("ownerId") int ownerId, Model model) {
 		Owner owner = this.owners.findById(ownerId);
 		model.addAttribute(owner);
-		logger.info("Query success called GET /owners/{ownerId}/edit");
+		logger.info("GET /owners/" + ownerId + "/edit - Request called");
+		logger.info("Update owner form  for owner id " + ownerId + " is rendered");
 		return VIEWS_OWNER_CREATE_OR_UPDATE_FORM;
 	}
 
@@ -146,12 +154,14 @@ class OwnerController {
 	public String processUpdateOwnerForm(@Valid Owner owner, BindingResult result,
 			@PathVariable("ownerId") int ownerId) {
 		if (result.hasErrors()) {
+			logger.error("Error occured in updating owner details");
 			return VIEWS_OWNER_CREATE_OR_UPDATE_FORM;
 		}
 
 		owner.setId(ownerId);
 		this.owners.save(owner);
-		logger.info("Query success called POST /owners/{ownerId}/edit");
+		logger.info("POST /owners/" + ownerId + "/edit - Request called");
+		logger.info("Owner details with ownerId :" + ownerId + " updated sucessfully in db");
 		return "redirect:/owners/{ownerId}";
 	}
 
@@ -165,6 +175,8 @@ class OwnerController {
 		ModelAndView mav = new ModelAndView("owners/ownerDetails");
 		Owner owner = this.owners.findById(ownerId);
 		mav.addObject(owner);
+		logger.info("GET /owners/" + ownerId + "- Request called");
+		logger.info("Owner details for ownerId: " + ownerId + " rendered");
 		return mav;
 	}
 

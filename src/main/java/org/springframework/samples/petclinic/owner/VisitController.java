@@ -78,7 +78,8 @@ class VisitController {
 	// called
 	@GetMapping("/owners/{ownerId}/pets/{petId}/visits/new")
 	public String initNewVisitForm() {
-		logger.info("Query success called GET /owners/*/pets/{petId}/visits/new");
+		logger.info("GET /owners/*/pets/{petId}/visits/new - Request called");
+		logger.info("Create or update visit form rendered");
 		return "pets/createOrUpdateVisitForm";
 	}
 
@@ -88,12 +89,16 @@ class VisitController {
 	public String processNewVisitForm(@ModelAttribute Owner owner, @PathVariable int petId, @Valid Visit visit,
 			BindingResult result) {
 		if (result.hasErrors()) {
+			logger.error("Error occured in creation/updation of visit for petId: " + petId);
+			logger.info("Create or updae visit form rendered");
 			return "pets/createOrUpdateVisitForm";
 		}
 
 		owner.addVisit(petId, visit);
 		this.owners.save(owner);
-		logger.info("Query success called POST /owners/{ownerId}/pets/{petId}/visits/new");
+		logger.info("POST /owners/{ownerId}/pets/" + petId + "/visits/new - Request called");
+		logger.info("Visit created and added to the database successfully");
+		logger.info("Fetching updated owner details from db - /owners/" + owner.getId());
 		return "redirect:/owners/{ownerId}";
 	}
 
