@@ -28,7 +28,8 @@ class WelcomeController {
 
 	@GetMapping("/")
 	public String welcome() {
-		logger.info("Query success called GET /");
+		logger.info("GET / - Request called");
+		logger.info("User logged into Welcome Page");
 		return "welcome";
 	}
 

@@ -34,7 +34,8 @@ class CrashController {
 
 	@GetMapping("/oups")
 	public String triggerException() {
-		logger.info("Query success called GET /oups");
+		logger.info("GET /oups - Request called");
+		logger.error("Error occured in requested page");
 		throw new RuntimeException(
 				"Expected: controller used to showcase what " + "happens when an exception is thrown");
 	}

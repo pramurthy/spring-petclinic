@@ -62,7 +62,7 @@ class VetController {
 		model.addAttribute("totalPages", paginated.getTotalPages());
 		model.addAttribute("totalItems", paginated.getTotalElements());
 		model.addAttribute("listVets", listVets);
-		logger.info("Query success called GET vets/vetList");
+		logger.info("GET vets/vetList - Request called");
 		return "vets/vetList";
 	}
 
@@ -78,7 +78,8 @@ class VetController {
 		// objects so it is simpler for JSon/Object mapping
 		Vets vets = new Vets();
 		vets.getVetList().addAll(this.vetRepository.findAll());
-		logger.info("Query success called GET /vets");
+		logger.info("GET /vets - Request called");
+		logger.info("List of veternerians renedered");
 		return vets;
 	}
 

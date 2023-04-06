@@ -83,24 +83,30 @@ class PetController {
 		Pet pet = new Pet();
 		owner.addPet(pet);
 		model.put("pet", pet);
-		logger.info("Query success called GET /pets/new");
+		logger.info("GET /pets/new - Request called");
+		logger.info("Create or update pet details form rendered");
 		return VIEWS_PETS_CREATE_OR_UPDATE_FORM;
 	}
 
 	@PostMapping("/pets/new")
 	public String processCreationForm(Owner owner, @Valid Pet pet, BindingResult result, ModelMap model) {
 		if (StringUtils.hasLength(pet.getName()) && pet.isNew() && owner.getPet(pet.getName(), true) != null) {
+			logger.info("Entered details of Pet match with existing Pet data in db");
 			result.rejectValue("name", "duplicate", "already exists");
 		}
 
 		owner.addPet(pet);
 		if (result.hasErrors()) {
 			model.put("pet", pet);
+			logger.error("Error occured while adding Pet");
+			logger.info("Create or update pet details form rendered");
 			return VIEWS_PETS_CREATE_OR_UPDATE_FORM;
 		}
 
 		this.owners.save(owner);
-		logger.info("Query success called POST /pets/new");
+		logger.info("POST /pets/new - Request called");
+		logger.info("Pet detail is successfully added to the database");
+		logger.info("Fetching updated owner details from db - /owners/" + owner.getId());
 		return "redirect:/owners/{ownerId}";
 	}
 
@@ -108,7 +114,8 @@ class PetController {
 	public String initUpdateForm(Owner owner, @PathVariable("petId") int petId, ModelMap model) {
 		Pet pet = owner.getPet(petId);
 		model.put("pet", pet);
-		logger.info("Query success called GET /pets/{petId}/edit");
+		logger.info("GET /pets/{petId}/edit - Request called");
+		logger.info("Update pet details form is rendered");
 		return VIEWS_PETS_CREATE_OR_UPDATE_FORM;
 	}
 
@@ -116,12 +123,16 @@ class PetController {
 	public String processUpdateForm(@Valid Pet pet, BindingResult result, Owner owner, ModelMap model) {
 		if (result.hasErrors()) {
 			model.put("pet", pet);
+			logger.error("Error is updating Pet details");
+			logger.info("Update pet details form is rendered");
 			return VIEWS_PETS_CREATE_OR_UPDATE_FORM;
 		}
 
 		owner.addPet(pet);
 		this.owners.save(owner);
-		logger.info("Query success called POST /pets/{petId}/edit");
+		logger.info("POST /pets/{petId}/edit - Request called");
+		logger.info("Pet details successfully updated to database");
+		logger.info("Fetching updated owner details from db - /owners/" + owner.getId());
 		return "redirect:/owners/{ownerId}";
 	}
 
