@@ -20,6 +20,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 
 @Controller
 class WelcomeController {
@@ -27,10 +29,14 @@ class WelcomeController {
 	Logger logger = LoggerFactory.getLogger(WelcomeController.class);
 
 	@GetMapping("/")
-	public String welcome() {
+	public String welcome(HttpSession session) {
 		logger.info("GET / - Request called");
 		logger.info("User logged into Welcome Page");
+		if (session.getAttribute("username") == null) {
+			return "login";
+		}
+		else{
 		return "welcome";
+		}
 	}
-
 }

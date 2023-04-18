@@ -17,6 +17,8 @@ package org.springframework.samples.petclinic.owner;
 
 import java.util.Collection;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.util.StringUtils;
@@ -79,7 +81,10 @@ class PetController {
 	}
 
 	@GetMapping("/pets/new")
-	public String initCreationForm(Owner owner, ModelMap model) {
+	public String initCreationForm(HttpSession session, Owner owner, ModelMap model) {
+		if (session.getAttribute("username") == null) {
+			return "login";
+		}
 		Pet pet = new Pet();
 		owner.addPet(pet);
 		model.put("pet", pet);
@@ -89,7 +94,11 @@ class PetController {
 	}
 
 	@PostMapping("/pets/new")
-	public String processCreationForm(Owner owner, @Valid Pet pet, BindingResult result, ModelMap model) {
+	public String processCreationForm(HttpSession session, Owner owner, @Valid Pet pet, BindingResult result,
+			ModelMap model) {
+		if (session.getAttribute("username") == null) {
+			return "login";
+		}
 		if (StringUtils.hasLength(pet.getName()) && pet.isNew() && owner.getPet(pet.getName(), true) != null) {
 			logger.info("Entered details of Pet match with existing Pet data in db");
 			result.rejectValue("name", "duplicate", "already exists");
@@ -111,7 +120,10 @@ class PetController {
 	}
 
 	@GetMapping("/pets/{petId}/edit")
-	public String initUpdateForm(Owner owner, @PathVariable("petId") int petId, ModelMap model) {
+	public String initUpdateForm(HttpSession session, Owner owner, @PathVariable("petId") int petId, ModelMap model) {
+		if (session.getAttribute("username") == null) {
+			return "login";
+		}
 		Pet pet = owner.getPet(petId);
 		model.put("pet", pet);
 		logger.info("GET /pets/{petId}/edit - Request called");
@@ -120,7 +132,11 @@ class PetController {
 	}
 
 	@PostMapping("/pets/{petId}/edit")
-	public String processUpdateForm(@Valid Pet pet, BindingResult result, Owner owner, ModelMap model) {
+	public String processUpdateForm(HttpSession session, @Valid Pet pet, BindingResult result, Owner owner,
+			ModelMap model) {
+		if (session.getAttribute("username") == null) {
+			return "login";
+		}
 		if (result.hasErrors()) {
 			model.put("pet", pet);
 			logger.error("Error is updating Pet details");

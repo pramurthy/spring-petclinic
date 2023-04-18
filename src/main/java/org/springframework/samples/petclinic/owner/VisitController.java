@@ -16,7 +16,8 @@
 package org.springframework.samples.petclinic.owner;
 
 import java.util.Map;
-
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.WebDataBinder;
@@ -77,7 +78,10 @@ class VisitController {
 	// Spring MVC calls method loadPetWithVisit(...) before initNewVisitForm is
 	// called
 	@GetMapping("/owners/{ownerId}/pets/{petId}/visits/new")
-	public String initNewVisitForm() {
+	public String initNewVisitForm(HttpSession session) {
+		if (session.getAttribute("username") == null) {
+			return "login";
+		}
 		logger.info("GET /owners/*/pets/{petId}/visits/new - Request called");
 		logger.info("Create or update visit form rendered");
 		return "pets/createOrUpdateVisitForm";
@@ -86,8 +90,11 @@ class VisitController {
 	// Spring MVC calls method loadPetWithVisit(...) before processNewVisitForm is
 	// called
 	@PostMapping("/owners/{ownerId}/pets/{petId}/visits/new")
-	public String processNewVisitForm(@ModelAttribute Owner owner, @PathVariable int petId, @Valid Visit visit,
-			BindingResult result) {
+	public String processNewVisitForm(HttpSession session, @ModelAttribute Owner owner, @PathVariable int petId,
+			@Valid Visit visit, BindingResult result) {
+		if (session.getAttribute("username") == null) {
+			return "login";
+		}
 		if (result.hasErrors()) {
 			logger.error("Error occured in creation/updation of visit for petId: " + petId);
 			logger.info("Create or updae visit form rendered");

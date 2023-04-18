@@ -17,6 +17,8 @@ package org.springframework.samples.petclinic.owner;
 
 import java.util.List;
 import java.util.Map;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -67,16 +69,22 @@ class OwnerController {
 	}
 
 	@GetMapping("/owners/new")
-	public String initCreationForm(Map<String, Object> model) {
+	public String initCreationForm(HttpSession session, Map<String, Object> model) {
+		if (session.getAttribute("username") == null) {
+			return "login";
+		}
 		Owner owner = new Owner();
 		model.put("owner", owner);
-		logger.info("GET /owners/new - Request recieved"); 
+		logger.info("GET /owners/new - Request recieved");
 		logger.info("Create or Update form rendered");
 		return VIEWS_OWNER_CREATE_OR_UPDATE_FORM;
 	}
 
 	@PostMapping("/owners/new")
-	public String processCreationForm(@Valid Owner owner, BindingResult result) {
+	public String processCreationForm(HttpSession session, @Valid Owner owner, BindingResult result) {
+		if (session.getAttribute("username") == null) {
+			return "login";
+		}
 		if (result.hasErrors()) {
 			logger.error("Error in creating new owner");
 			return VIEWS_OWNER_CREATE_OR_UPDATE_FORM;
@@ -89,15 +97,21 @@ class OwnerController {
 	}
 
 	@GetMapping("/owners/find")
-	public String initFindForm() {
+	public String initFindForm(HttpSession session) {
+		if (session.getAttribute("username") == null) {
+			return "login";
+		}
 		logger.info("GET /owners/find - Request called");
 		logger.info("Find owner page is requested");
 		return "owners/findOwners";
 	}
 
 	@GetMapping("/owners")
-	public String processFindForm(@RequestParam(defaultValue = "1") int page, Owner owner, BindingResult result,
-			Model model) {
+	public String processFindForm(HttpSession session, @RequestParam(defaultValue = "1") int page, Owner owner,
+			BindingResult result, Model model) {
+		if (session.getAttribute("username") == null) {
+			return "login";
+		}
 		// allow parameterless GET request for /owners to return all records
 		if (owner.getLastName() == null) {
 			owner.setLastName(""); // empty string signifies broadest possible search
@@ -142,7 +156,10 @@ class OwnerController {
 	}
 
 	@GetMapping("/owners/{ownerId}/edit")
-	public String initUpdateOwnerForm(@PathVariable("ownerId") int ownerId, Model model) {
+	public String initUpdateOwnerForm(HttpSession session, @PathVariable("ownerId") int ownerId, Model model) {
+		if (session.getAttribute("username") == null) {
+			return "login";
+		}
 		Owner owner = this.owners.findById(ownerId);
 		model.addAttribute(owner);
 		logger.info("GET /owners/" + ownerId + "/edit - Request called");
@@ -151,8 +168,11 @@ class OwnerController {
 	}
 
 	@PostMapping("/owners/{ownerId}/edit")
-	public String processUpdateOwnerForm(@Valid Owner owner, BindingResult result,
+	public String processUpdateOwnerForm(HttpSession session, @Valid Owner owner, BindingResult result,
 			@PathVariable("ownerId") int ownerId) {
+		if (session.getAttribute("username") == null) {
+			return "login";
+		}
 		if (result.hasErrors()) {
 			logger.error("Error occured in updating owner details");
 			return VIEWS_OWNER_CREATE_OR_UPDATE_FORM;
@@ -171,7 +191,7 @@ class OwnerController {
 	 * @return a ModelMap with the model attributes for the view
 	 */
 	@GetMapping("/owners/{ownerId}")
-	public ModelAndView showOwner(@PathVariable("ownerId") int ownerId) {
+	public ModelAndView showOwner(HttpSession session, @PathVariable("ownerId") int ownerId) {
 		ModelAndView mav = new ModelAndView("owners/ownerDetails");
 		Owner owner = this.owners.findById(ownerId);
 		mav.addObject(owner);
