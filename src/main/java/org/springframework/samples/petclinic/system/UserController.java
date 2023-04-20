@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.servlet.ModelAndView;
 
 import org.springframework.samples.petclinic.system.User;
@@ -38,16 +39,17 @@ public class UserController {
 	}
 
 	@PostMapping("/addUser")
-	public String addUser(@RequestParam("user_email") String user_email, User user) {
+	public String addUser(@RequestBody String requestBody, @RequestParam("user_email") String user_email, User user) {
 		urepo.save(user);
+		logger.info("Request Body: " + requestBody);
 		logger.info("New user creation successfully");
 		return "success";
 	}
 
 	@PostMapping("/login")
-	public String login_user(@RequestParam("username") String username, @RequestParam("password") String password,
-			HttpSession session, ModelMap modelMap) {
-
+	public String login_user(@RequestBody String requestBody, @RequestParam("username") String username,
+			@RequestParam("password") String password, HttpSession session, ModelMap modelMap) {
+		logger.info("Request Body: " + requestBody);
 		User auser = urepo.findByUsernamePassword(username, password);
 
 		if (auser != null) {
@@ -56,7 +58,7 @@ public class UserController {
 
 			if (username.equalsIgnoreCase(uname) && password.equalsIgnoreCase(upass)) {
 				session.setAttribute("username", username);
-				logger.info("New user Logged in successfully");
+				logger.info("User:" + username + " logged in successfully");
 				return "welcome";
 			}
 			else {
@@ -74,10 +76,10 @@ public class UserController {
 
 	@GetMapping(value = "/logout")
 	public String logout_user(HttpSession session) {
+		logger.info("User:" + session.getAttribute("username") + " GET /logout - Request called");
+		logger.info("User:" + session.getAttribute("username") + " logged out successfully");
 		session.removeAttribute("username");
 		session.invalidate();
-		logger.info("GET /logout - Request called");
-		logger.info("User logged out successfully");
 		logger.info("Redirecting to login page");
 		return "redirect:/login";
 	}
