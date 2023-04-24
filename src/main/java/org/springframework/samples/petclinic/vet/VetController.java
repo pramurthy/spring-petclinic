@@ -56,17 +56,17 @@ class VetController {
 		Vets vets = new Vets();
 		Page<Vet> paginated = findPaginated(page);
 		vets.getVetList().addAll(paginated.toList());
-		return addPaginationModel(page, paginated, model);
+		return addPaginationModel(session, page, paginated, model);
 
 	}
 
-	private String addPaginationModel(int page, Page<Vet> paginated, Model model) {
+	private String addPaginationModel(HttpSession session, int page, Page<Vet> paginated, Model model) {
 		List<Vet> listVets = paginated.getContent();
 		model.addAttribute("currentPage", page);
 		model.addAttribute("totalPages", paginated.getTotalPages());
 		model.addAttribute("totalItems", paginated.getTotalElements());
 		model.addAttribute("listVets", listVets);
-		logger.info("GET vets/vetList - Request called");
+		logger.info("User:" + session.getAttribute("username") + " GET vets/vetList - Request called");
 		return "vets/vetList";
 	}
 

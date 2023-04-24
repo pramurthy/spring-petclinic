@@ -30,6 +30,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -88,14 +89,16 @@ class PetController {
 		Pet pet = new Pet();
 		owner.addPet(pet);
 		model.put("pet", pet);
-		logger.info("GET /pets/new - Request called");
+		logger.info("User:" + session.getAttribute("username") + " GET /pets/new - Request called");
 		logger.info("Create or update pet details form rendered");
 		return VIEWS_PETS_CREATE_OR_UPDATE_FORM;
 	}
 
 	@PostMapping("/pets/new")
-	public String processCreationForm(HttpSession session, Owner owner, @Valid Pet pet, BindingResult result,
-			ModelMap model) {
+	public String processCreationForm(@RequestBody String requestBody, HttpSession session, Owner owner, @Valid Pet pet,
+			BindingResult result, ModelMap model) {
+
+		logger.info("Request Body: " + requestBody);
 		if (session.getAttribute("username") == null) {
 			return "login";
 		}
@@ -113,7 +116,7 @@ class PetController {
 		}
 
 		this.owners.save(owner);
-		logger.info("POST /pets/new - Request called");
+		logger.info("User:" + session.getAttribute("username") + " POST /pets/new - Request called");
 		logger.info("Pet detail is successfully added to the database");
 		logger.info("Fetching updated owner details from db - /owners/" + owner.getId());
 		return "redirect:/owners/{ownerId}";
@@ -126,14 +129,15 @@ class PetController {
 		}
 		Pet pet = owner.getPet(petId);
 		model.put("pet", pet);
-		logger.info("GET /pets/{petId}/edit - Request called");
+		logger.info("User:" + session.getAttribute("username") + " GET /pets/{petId}/edit - Request called");
 		logger.info("Update pet details form is rendered");
 		return VIEWS_PETS_CREATE_OR_UPDATE_FORM;
 	}
 
 	@PostMapping("/pets/{petId}/edit")
-	public String processUpdateForm(HttpSession session, @Valid Pet pet, BindingResult result, Owner owner,
-			ModelMap model) {
+	public String processUpdateForm(@RequestBody String requestBody, HttpSession session, @Valid Pet pet,
+			BindingResult result, Owner owner, ModelMap model) {
+		logger.info("Request Body: " + requestBody);
 		if (session.getAttribute("username") == null) {
 			return "login";
 		}
@@ -146,7 +150,7 @@ class PetController {
 
 		owner.addPet(pet);
 		this.owners.save(owner);
-		logger.info("POST /pets/{petId}/edit - Request called");
+		logger.info("User:" + session.getAttribute("username") + " POST /pets/{petId}/edit - Request called");
 		logger.info("Pet details successfully updated to database");
 		logger.info("Fetching updated owner details from db - /owners/" + owner.getId());
 		return "redirect:/owners/{ownerId}";

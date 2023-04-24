@@ -26,6 +26,7 @@ import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -82,7 +83,8 @@ class VisitController {
 		if (session.getAttribute("username") == null) {
 			return "login";
 		}
-		logger.info("GET /owners/*/pets/{petId}/visits/new - Request called");
+		logger.info(
+				"User:" + session.getAttribute("username") + " GET /owners/*/pets/{petId}/visits/new - Request called");
 		logger.info("Create or update visit form rendered");
 		return "pets/createOrUpdateVisitForm";
 	}
@@ -90,8 +92,9 @@ class VisitController {
 	// Spring MVC calls method loadPetWithVisit(...) before processNewVisitForm is
 	// called
 	@PostMapping("/owners/{ownerId}/pets/{petId}/visits/new")
-	public String processNewVisitForm(HttpSession session, @ModelAttribute Owner owner, @PathVariable int petId,
-			@Valid Visit visit, BindingResult result) {
+	public String processNewVisitForm(@RequestBody String requestBody, HttpSession session, @ModelAttribute Owner owner,
+			@PathVariable int petId, @Valid Visit visit, BindingResult result) {
+		logger.info("Request Body: " + requestBody);
 		if (session.getAttribute("username") == null) {
 			return "login";
 		}
@@ -103,7 +106,8 @@ class VisitController {
 
 		owner.addVisit(petId, visit);
 		this.owners.save(owner);
-		logger.info("POST /owners/{ownerId}/pets/" + petId + "/visits/new - Request called");
+		logger.info("User:" + session.getAttribute("username") + " POST /owners/{ownerId}/pets/" + petId
+				+ "/visits/new - Request called");
 		logger.info("Visit created and added to the database successfully");
 		logger.info("Fetching updated owner details from db - /owners/" + owner.getId());
 		return "redirect:/owners/{ownerId}";
