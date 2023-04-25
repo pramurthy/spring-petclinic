@@ -76,7 +76,7 @@ class OwnerController {
 		}
 		Owner owner = new Owner();
 		model.put("owner", owner);
-		logger.info("User:" + session.getAttribute("username") + " GET /owners/new - Request recieved");
+		logger.info("User:" + session.getAttribute("username") + " made the request GET /owners/new");
 		logger.info("Create or Update form rendered");
 		return VIEWS_OWNER_CREATE_OR_UPDATE_FORM;
 	}
@@ -94,7 +94,7 @@ class OwnerController {
 		}
 
 		this.owners.save(owner);
-		logger.info("User:" + session.getAttribute("username") + " POST /owners/new - Request called");
+		logger.info("User:" + session.getAttribute("username") + " made the request POST /owners/new");
 		logger.info("New owner with owner id :" + owner.getId() + " created and added to database successfully");
 		logger.info("Fetching new owner details from db - /owners/" + owner.getId());
 		return "redirect:/owners/" + owner.getId();
@@ -105,7 +105,7 @@ class OwnerController {
 		if (session.getAttribute("username") == null) {
 			return "login";
 		}
-		logger.info("User:" + session.getAttribute("username") + " GET /owners/find - Request called");
+		logger.info("User:" + session.getAttribute("username") + " made the request  GET /owners/find");
 		logger.info("Find owner page is requested");
 		return "owners/findOwners";
 	}
@@ -116,11 +116,13 @@ class OwnerController {
 		if (session.getAttribute("username") == null) {
 			return "login";
 		}
+		logger.info("User:" + session.getAttribute("username") + " made the request  GET /owners");
 		// allow parameterless GET request for /owners to return all records
 		if (owner.getLastName() == null) {
 			owner.setLastName(""); // empty string signifies broadest possible search
 		}
-
+		logger.info("User:" + session.getAttribute("username") + " requested the details of owner with lastname:"
+				+ owner.getLastName());
 		// find owners by last name
 		Page<Owner> ownersResults = findPaginatedForOwnersLastName(page, owner.getLastName());
 		if (ownersResults.isEmpty()) {
@@ -134,7 +136,6 @@ class OwnerController {
 		if (ownersResults.getTotalElements() == 1) {
 			// 1 owner found
 			owner = ownersResults.iterator().next();
-			logger.info("User:" + session.getAttribute("username") + " GET /owners - Request called");
 			logger.info("Redirecting to /owners/" + owner.getId());
 			return "redirect:/owners/" + owner.getId();
 		}
@@ -156,6 +157,7 @@ class OwnerController {
 	private Page<Owner> findPaginatedForOwnersLastName(int page, String lastname) {
 		int pageSize = 5;
 		Pageable pageable = PageRequest.of(page - 1, pageSize);
+		logger.info("Searching for owner with lastname:" + lastname);
 		return owners.findByLastName(lastname, pageable);
 	}
 
@@ -166,7 +168,7 @@ class OwnerController {
 		}
 		Owner owner = this.owners.findById(ownerId);
 		model.addAttribute(owner);
-		logger.info("User:" + session.getAttribute("username") + " GET /owners/" + ownerId + "/edit - Request called");
+		logger.info("User:" + session.getAttribute("username") + " made the request  GET /owners/" + ownerId + "/edit");
 		logger.info("Update owner form  for owner id " + ownerId + " is rendered");
 		return VIEWS_OWNER_CREATE_OR_UPDATE_FORM;
 	}
@@ -185,7 +187,8 @@ class OwnerController {
 
 		owner.setId(ownerId);
 		this.owners.save(owner);
-		logger.info("User:" + session.getAttribute("username") + " POST /owners/" + ownerId + "/edit - Request called");
+		logger
+			.info("User:" + session.getAttribute("username") + " made the request  POST /owners/" + ownerId + "/edit");
 		logger.info("Owner details with ownerId :" + ownerId + " updated sucessfully in db");
 		return "redirect:/owners/{ownerId}";
 	}
@@ -200,7 +203,7 @@ class OwnerController {
 		ModelAndView mav = new ModelAndView("owners/ownerDetails");
 		Owner owner = this.owners.findById(ownerId);
 		mav.addObject(owner);
-		logger.info("User:" + session.getAttribute("username") + " GET /owners/" + ownerId + "- Request called");
+		logger.info("User:" + session.getAttribute("username") + " made the request  GET /owners/" + ownerId);
 		logger.info("Owner details for ownerId: " + ownerId + " rendered");
 		return mav;
 	}

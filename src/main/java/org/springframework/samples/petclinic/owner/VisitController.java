@@ -83,8 +83,8 @@ class VisitController {
 		if (session.getAttribute("username") == null) {
 			return "login";
 		}
-		logger.info(
-				"User:" + session.getAttribute("username") + " GET /owners/*/pets/{petId}/visits/new - Request called");
+		logger.info("User:" + session.getAttribute("username")
+				+ " made the request  GET /owners/*/pets/{petId}/visits/new");
 		logger.info("Create or update visit form rendered");
 		return "pets/createOrUpdateVisitForm";
 	}
@@ -106,8 +106,8 @@ class VisitController {
 
 		owner.addVisit(petId, visit);
 		this.owners.save(owner);
-		logger.info("User:" + session.getAttribute("username") + " POST /owners/{ownerId}/pets/" + petId
-				+ "/visits/new - Request called");
+		logger.info("User:" + session.getAttribute("username") + " made the request POST /owners/{ownerId}/pets/"
+				+ petId + "/visits/new");
 		logger.info("Visit created and added to the database successfully");
 		logger.info("Fetching updated owner details from db - /owners/" + owner.getId());
 		return "redirect:/owners/{ownerId}";

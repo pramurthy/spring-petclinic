@@ -76,12 +76,12 @@ public class UserController {
 
 	@GetMapping(value = "/logout")
 	public String logout_user(HttpSession session) {
-		logger.info("User:" + session.getAttribute("username") + " GET /logout - Request called");
+		logger.info("User:" + session.getAttribute("username") + " made the request GET /logout");
 		logger.info("User:" + session.getAttribute("username") + " logged out successfully");
 		session.removeAttribute("username");
 		session.invalidate();
 		logger.info("Redirecting to login page");
-		return "redirect:/login";
+		return "login";
 	}
 
 	@GetMapping(value = "/home")
