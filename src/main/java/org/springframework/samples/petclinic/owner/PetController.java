@@ -89,7 +89,7 @@ class PetController {
 		Pet pet = new Pet();
 		owner.addPet(pet);
 		model.put("pet", pet);
-		logger.info("User:" + session.getAttribute("username") + " GET /pets/new - Request called");
+		logger.info("User:" + session.getAttribute("username") + " made the request  GET /pets/new");
 		logger.info("Create or update pet details form rendered");
 		return VIEWS_PETS_CREATE_OR_UPDATE_FORM;
 	}
@@ -116,7 +116,7 @@ class PetController {
 		}
 
 		this.owners.save(owner);
-		logger.info("User:" + session.getAttribute("username") + " POST /pets/new - Request called");
+		logger.info("User:" + session.getAttribute("username") + " made the request  POST /pets/new");
 		logger.info("Pet detail is successfully added to the database");
 		logger.info("Fetching updated owner details from db - /owners/" + owner.getId());
 		return "redirect:/owners/{ownerId}";
@@ -129,7 +129,7 @@ class PetController {
 		}
 		Pet pet = owner.getPet(petId);
 		model.put("pet", pet);
-		logger.info("User:" + session.getAttribute("username") + " GET /pets/{petId}/edit - Request called");
+		logger.info("User:" + session.getAttribute("username") + " made the request  GET /pets/{petId}/edit");
 		logger.info("Update pet details form is rendered");
 		return VIEWS_PETS_CREATE_OR_UPDATE_FORM;
 	}
@@ -150,7 +150,7 @@ class PetController {
 
 		owner.addPet(pet);
 		this.owners.save(owner);
-		logger.info("User:" + session.getAttribute("username") + " POST /pets/{petId}/edit - Request called");
+		logger.info("User:" + session.getAttribute("username") + " made the request  POST /pets/{petId}/edit");
 		logger.info("Pet details successfully updated to database");
 		logger.info("Fetching updated owner details from db - /owners/" + owner.getId());
 		return "redirect:/owners/{ownerId}";

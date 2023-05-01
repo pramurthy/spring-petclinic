@@ -30,12 +30,12 @@ class WelcomeController {
 
 	@GetMapping("/")
 	public String welcome(HttpSession session) {
-		logger.info("User:" + session.getAttribute("username") + " GET / - Request called");
-		logger.info("User:" + session.getAttribute("username") + " logged into Welcome Page");
 		if (session.getAttribute("username") == null) {
 			return "login";
 		}
 		else {
+			logger.info("User:" + session.getAttribute("username") + " made the request GET /");
+			logger.info("User:" + session.getAttribute("username") + " logged into Welcome Page");
 			return "welcome";
 		}
 	}
