@@ -22,6 +22,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
+import co.elastic.apm.api.ElasticApm;
+import co.elastic.apm.api.CaptureSpan;
+import co.elastic.apm.api.Span;
+import java.lang.String;
 
 @Controller
 class WelcomeController {
@@ -29,11 +33,14 @@ class WelcomeController {
 	Logger logger = LoggerFactory.getLogger(WelcomeController.class);
 
 	@GetMapping("/")
+	@CaptureSpan
 	public String welcome(HttpSession session) {
 		if (session.getAttribute("username") == null) {
 			return "login";
 		}
 		else {
+			Span span = ElasticApm.currentSpan();
+			span.addLabel("_tag_user", String.valueOf(session.getAttribute("username")));
 			logger.info("User:" + session.getAttribute("username") + " made the request GET /");
 			logger.info("User:" + session.getAttribute("username") + " logged into Welcome Page");
 			return "welcome";

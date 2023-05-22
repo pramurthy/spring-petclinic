@@ -33,6 +33,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import co.elastic.apm.api.ElasticApm;
+import co.elastic.apm.api.CaptureSpan;
+import co.elastic.apm.api.Span;
+import java.lang.String;
 
 import jakarta.validation.Valid;
 
@@ -82,10 +86,13 @@ class PetController {
 	}
 
 	@GetMapping("/pets/new")
+	@CaptureSpan
 	public String initCreationForm(HttpSession session, Owner owner, ModelMap model) {
 		if (session.getAttribute("username") == null) {
 			return "login";
 		}
+		Span span = ElasticApm.currentSpan();
+		span.addLabel("_tag_user", String.valueOf(session.getAttribute("username")));
 		Pet pet = new Pet();
 		owner.addPet(pet);
 		model.put("pet", pet);
@@ -95,6 +102,7 @@ class PetController {
 	}
 
 	@PostMapping("/pets/new")
+	@CaptureSpan
 	public String processCreationForm(@RequestBody String requestBody, HttpSession session, Owner owner, @Valid Pet pet,
 			BindingResult result, ModelMap model) {
 
@@ -102,6 +110,8 @@ class PetController {
 		if (session.getAttribute("username") == null) {
 			return "login";
 		}
+		Span span = ElasticApm.currentSpan();
+		span.addLabel("_tag_user", String.valueOf(session.getAttribute("username")));
 		if (StringUtils.hasLength(pet.getName()) && pet.isNew() && owner.getPet(pet.getName(), true) != null) {
 			logger.info("Entered details of Pet match with existing Pet data in db");
 			result.rejectValue("name", "duplicate", "already exists");
@@ -123,10 +133,13 @@ class PetController {
 	}
 
 	@GetMapping("/pets/{petId}/edit")
+	@CaptureSpan
 	public String initUpdateForm(HttpSession session, Owner owner, @PathVariable("petId") int petId, ModelMap model) {
 		if (session.getAttribute("username") == null) {
 			return "login";
 		}
+		Span span = ElasticApm.currentSpan();
+		span.addLabel("_tag_user", String.valueOf(session.getAttribute("username")));
 		Pet pet = owner.getPet(petId);
 		model.put("pet", pet);
 		logger.info("User:" + session.getAttribute("username") + " made the request  GET /pets/{petId}/edit");
@@ -135,12 +148,15 @@ class PetController {
 	}
 
 	@PostMapping("/pets/{petId}/edit")
+	@CaptureSpan
 	public String processUpdateForm(@RequestBody String requestBody, HttpSession session, @Valid Pet pet,
 			BindingResult result, Owner owner, ModelMap model) {
 		logger.info("Request Body: " + requestBody);
 		if (session.getAttribute("username") == null) {
 			return "login";
 		}
+		Span span = ElasticApm.currentSpan();
+		span.addLabel("_tag_user", String.valueOf(session.getAttribute("username")));
 		if (result.hasErrors()) {
 			model.put("pet", pet);
 			logger.error("Error is updating Pet details");

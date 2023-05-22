@@ -16,9 +16,12 @@ import org.springframework.web.servlet.ModelAndView;
 
 import org.springframework.samples.petclinic.system.User;
 import org.springframework.samples.petclinic.system.UserRepository;
-
+import co.elastic.apm.api.ElasticApm;
+import co.elastic.apm.api.CaptureSpan;
+import co.elastic.apm.api.Span;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import java.lang.String;
 
 @Controller
 public class UserController {
@@ -28,6 +31,7 @@ public class UserController {
 
 	Logger logger = LoggerFactory.getLogger(UserController.class);
 
+	// ElasticApm.currentSpan().addLabel("user","iamtheuser");
 	@RequestMapping("/signup")
 	public String getSignup() {
 		return "signup";
@@ -75,9 +79,14 @@ public class UserController {
 	}
 
 	@GetMapping(value = "/logout")
+	@CaptureSpan
 	public String logout_user(HttpSession session) {
-		logger.info("User:" + session.getAttribute("username") + " made the request GET /logout");
-		logger.info("User:" + session.getAttribute("username") + " logged out successfully");
+		if (session.getAttribute("username") != null) {
+			logger.info("User:" + session.getAttribute("username") + " made the request GET /logout");
+			logger.info("User:" + session.getAttribute("username") + " logged out successfully");
+			Span span = ElasticApm.currentSpan();
+			span.addLabel("_tag_user", String.valueOf(session.getAttribute("username")));
+		}
 		session.removeAttribute("username");
 		session.invalidate();
 		logger.info("Redirecting to login page");
@@ -85,11 +94,14 @@ public class UserController {
 	}
 
 	@GetMapping(value = "/home")
+	@CaptureSpan
 	public String home(HttpSession session) {
 		if (session.getAttribute("username") == null) {
 			return "login";
 		}
 		else {
+			Span span = ElasticApm.currentSpan();
+			span.addLabel("_tag_user", String.valueOf(session.getAttribute("username")));
 			return "welcome";
 		}
 	}
