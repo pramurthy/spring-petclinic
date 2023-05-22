@@ -17,9 +17,9 @@ package org.springframework.samples.petclinic.owner;
 
 import java.util.List;
 import java.util.Map;
+import java.lang.String;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -37,7 +37,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.servlet.ModelAndView;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+import co.elastic.apm.api.ElasticApm;
+import co.elastic.apm.api.CaptureSpan;
+import co.elastic.apm.api.Span;
 import jakarta.validation.Valid;
 
 /**
@@ -70,6 +72,7 @@ class OwnerController {
 	}
 
 	@GetMapping("/owners/new")
+	@CaptureSpan
 	public String initCreationForm(HttpSession session, Map<String, Object> model) {
 		if (session.getAttribute("username") == null) {
 			return "login";
@@ -82,6 +85,7 @@ class OwnerController {
 	}
 
 	@PostMapping("/owners/new")
+	@CaptureSpan
 	public String processCreationForm(@RequestBody String requestBody, HttpSession session, @Valid Owner owner,
 			BindingResult result) {
 		logger.info("Request Body: " + requestBody);
@@ -92,7 +96,8 @@ class OwnerController {
 			logger.error("Error in creating new owner");
 			return VIEWS_OWNER_CREATE_OR_UPDATE_FORM;
 		}
-
+		Span span = ElasticApm.currentSpan();
+		span.addLabel("_tag_user", String.valueOf(session.getAttribute("username")));
 		this.owners.save(owner);
 		logger.info("User:" + session.getAttribute("username") + " made the request POST /owners/new");
 		logger.info("New owner with owner id :" + owner.getId() + " created and added to database successfully");
@@ -101,28 +106,36 @@ class OwnerController {
 	}
 
 	@GetMapping("/owners/find")
+	@CaptureSpan
 	public String initFindForm(HttpSession session) {
 		if (session.getAttribute("username") == null) {
 			return "login";
 		}
+		Span span = ElasticApm.currentSpan();
+		span.addLabel("_tag_user", String.valueOf(session.getAttribute("username")));
 		logger.info("User:" + session.getAttribute("username") + " made the request  GET /owners/find");
 		logger.info("Find owner page is requested");
 		return "owners/findOwners";
 	}
 
 	@GetMapping("/owners")
+	@CaptureSpan
 	public String processFindForm(HttpSession session, @RequestParam(defaultValue = "1") int page, Owner owner,
 			BindingResult result, Model model) {
 		if (session.getAttribute("username") == null) {
 			return "login";
 		}
+		Span span = ElasticApm.currentSpan();
+		span.addLabel("_tag_user", String.valueOf(session.getAttribute("username")));
 		logger.info("User:" + session.getAttribute("username") + " made the request  GET /owners");
 		// allow parameterless GET request for /owners to return all records
 		if (owner.getLastName() == null) {
 			owner.setLastName(""); // empty string signifies broadest possible search
 		}
-		logger.info("User:" + session.getAttribute("username") + " requested the details of owner with lastname:"
-				+ owner.getLastName());
+		else {
+			logger.info("User:" + session.getAttribute("username") + " requested the details of owner with lastname:"
+					+ owner.getLastName());
+		}
 		// find owners by last name
 		Page<Owner> ownersResults = findPaginatedForOwnersLastName(page, owner.getLastName());
 		if (ownersResults.isEmpty()) {
@@ -157,15 +170,20 @@ class OwnerController {
 	private Page<Owner> findPaginatedForOwnersLastName(int page, String lastname) {
 		int pageSize = 5;
 		Pageable pageable = PageRequest.of(page - 1, pageSize);
-		logger.info("Searching for owner with lastname:" + lastname);
+		if (lastname != "") {
+			logger.info("Searching for owner details with lastname:" + lastname);
+		}
 		return owners.findByLastName(lastname, pageable);
 	}
 
 	@GetMapping("/owners/{ownerId}/edit")
+	@CaptureSpan
 	public String initUpdateOwnerForm(HttpSession session, @PathVariable("ownerId") int ownerId, Model model) {
 		if (session.getAttribute("username") == null) {
 			return "login";
 		}
+		Span span = ElasticApm.currentSpan();
+		span.addLabel("_tag_user", String.valueOf(session.getAttribute("username")));
 		Owner owner = this.owners.findById(ownerId);
 		model.addAttribute(owner);
 		logger.info("User:" + session.getAttribute("username") + " made the request  GET /owners/" + ownerId + "/edit");
@@ -174,12 +192,15 @@ class OwnerController {
 	}
 
 	@PostMapping("/owners/{ownerId}/edit")
+	@CaptureSpan
 	public String processUpdateOwnerForm(@RequestBody String requestBody, HttpSession session, @Valid Owner owner,
 			BindingResult result, @PathVariable("ownerId") int ownerId) {
 		logger.info("Request Body " + requestBody);
 		if (session.getAttribute("username") == null) {
 			return "login";
 		}
+		Span span = ElasticApm.currentSpan();
+		span.addLabel("_tag_user", String.valueOf(session.getAttribute("username")));
 		if (result.hasErrors()) {
 			logger.error("Error occured in updating owner details");
 			return VIEWS_OWNER_CREATE_OR_UPDATE_FORM;
@@ -199,10 +220,13 @@ class OwnerController {
 	 * @return a ModelMap with the model attributes for the view
 	 */
 	@GetMapping("/owners/{ownerId}")
+	@CaptureSpan
 	public ModelAndView showOwner(HttpSession session, @PathVariable("ownerId") int ownerId) {
 		ModelAndView mav = new ModelAndView("owners/ownerDetails");
 		Owner owner = this.owners.findById(ownerId);
 		mav.addObject(owner);
+		Span span = ElasticApm.currentSpan();
+		span.addLabel("_tag_user", String.valueOf(session.getAttribute("username")));
 		logger.info("User:" + session.getAttribute("username") + " made the request  GET /owners/" + ownerId);
 		logger.info("Owner details for ownerId: " + ownerId + " rendered");
 		return mav;
