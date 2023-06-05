@@ -93,6 +93,22 @@ public class UserController {
 		return "login";
 	}
 
+	@GetMapping(value = "/slow")
+	@CaptureSpan
+	public String slowQuery(HttpSession session) {
+		if (session.getAttribute("username") != null) {
+			Span span = ElasticApm.currentSpan();
+			span.addLabel("_tag_user", String.valueOf(session.getAttribute("username")));
+			String name = "vijay";
+			User auser = urepo.findByFname(name);
+			logger.info("User:" + session.getAttribute("username") + " executed Slow query");
+			return "welcome";
+		}
+		else {
+			return "login";
+		}
+	}
+
 	@GetMapping(value = "/home")
 	@CaptureSpan
 	public String home(HttpSession session) {
