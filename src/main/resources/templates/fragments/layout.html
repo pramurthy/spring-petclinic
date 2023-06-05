@@ -62,6 +62,10 @@
             <span class="fa exclamation-triangle" aria-hidden="true"></span>
             <span>Error</span>
           </li>
+          <li th:replace="~{::menuItem ('/slow','Slow','trigger a Slow Query to see how it is handled','clock-o','SlowQuery')}">
+            <span class="fa fa-clock-o" aria-hidden="true"></span>
+            <span>SlowQuery</span>
+          </li>
           </ul>
           <ul class="nav navbar-nav navbar-right">
           <li id="logout" th:replace="~{::menuItem ('/logout','logout','Logout from current session','lock','Logout')}">
