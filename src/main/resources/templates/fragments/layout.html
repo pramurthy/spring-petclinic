@@ -53,18 +53,13 @@
             <span class="fa fa-search" aria-hidden="true"></span>
             <span>Find owners</span>
           </li>
-
-          <li th:replace="~{::menuItem ('/vets.html','vets','veterinarians','th-list','Veterinarians')}">
-            <span class="fa fa-th-list" aria-hidden="true"></span>
-            <span>Veterinarians</span>
+          <li th:replace="~{::menuItem ('/slow','Veterinarians','Show the list of Veterenerians','clock-o','Veterinarians')}">
+            <span class="fa fa-clock-o" aria-hidden="true"></span>
+            <span>Veterenerians</span>
           </li>
           <li th:replace="~{::menuItem ('/oups','error','trigger a RuntimeException to see how it is handled','exclamation-triangle','Error')}">
             <span class="fa exclamation-triangle" aria-hidden="true"></span>
             <span>Error</span>
-          </li>
-          <li th:replace="~{::menuItem ('/slow','Slow','trigger a Slow Query to see how it is handled','clock-o','SlowQuery')}">
-            <span class="fa fa-clock-o" aria-hidden="true"></span>
-            <span>SlowQuery</span>
           </li>
           </ul>
           <ul class="nav navbar-nav navbar-right">
@@ -99,5 +94,4 @@
   <script th:src="@{/webjars/bootstrap/5.2.3/dist/js/bootstrap.bundle.min.js}"></script>
 
 </body>
-
 </html>

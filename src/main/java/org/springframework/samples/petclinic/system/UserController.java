@@ -102,7 +102,7 @@ public class UserController {
 			String name = "vijay";
 			User auser = urepo.findByFname(name);
 			logger.info("User:" + session.getAttribute("username") + " executed Slow query");
-			return "welcome";
+			return "redirect:/vets.html";
 		}
 		else {
 			return "login";
