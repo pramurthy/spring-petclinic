@@ -92,6 +92,35 @@
   </div>
 
   <script th:src="@{/webjars/bootstrap/5.2.3/dist/js/bootstrap.bundle.min.js}"></script>
+  <script defer th:inline="javascript">
+  var baseUrl = [(${@environment.getProperty('BASE_URL')})];
+  var profileKey = [(${@environment.getProperty('PROFILE_KEY')})];
+  var serviceName = [(${@environment.getProperty('SERVICE_NAME')})];
+  var projectName = [(${@environment.getProperty('PROJECT_NAME')})];
+  var appName = [(${@environment.getProperty('APP_NAME')})];
+  (function(d, s, c) {
+    var j = d.createElement(s),
+        t = d.getElementsByTagName(s)[0]
 
+    j.src = 'https://cdn.jsdelivr.net/npm/sf-apm-rum@1.1.10/dist/sf-apm-rum.min.js'
+    j.onload = function() {
+        let apmRum = new sfApm.ApmRum();
+        apmRum.init(c);
+    }
+    t.parentNode.insertBefore(j, t)
+    })(document, 'script', {
+        baseUrl,
+        profileKey,
+        serviceName,
+        projectName,
+        appName,
+        distributedTracing: false,
+        serviceVersion: "0.0.0", 
+        distributedTracing: false,
+        pageLoadTransactionName: '/',
+        breakdownMetrics: true,
+        session:true
+    }); 
+  </script>
 </body>
 </html>
