@@ -54,7 +54,7 @@ public class UserController {
 	public String login_user(@RequestBody String requestBody, @RequestParam("username") String username,
 			@RequestParam("password") String password, HttpSession session, ModelMap modelMap) {
 		logger.info("Request Body: " + requestBody);
-		User auser = urepo.findByUsernamePassword(username, password);
+		User auser = urepo.findByUsernamePassword(username, password).get(0);
 
 		if (auser != null) {
 			String uname = auser.getUser_email();
@@ -63,6 +63,7 @@ public class UserController {
 			if (username.equalsIgnoreCase(uname) && password.equalsIgnoreCase(upass)) {
 				session.setAttribute("username", username);
 				logger.info("User:" + username + " logged in successfully");
+				System.out.println("user login");
 				return "welcome";
 			}
 			else {
@@ -99,7 +100,7 @@ public class UserController {
 		if (session.getAttribute("username") != null) {
 			Span span = ElasticApm.currentSpan();
 			span.addLabel("_tag_user", String.valueOf(session.getAttribute("username")));
-			String name = "vijay";
+			String name = (String) session.getAttribute("username");
 			User auser = urepo.findByFname(name);
 			logger.info("User:" + session.getAttribute("username") + " executed Slow query");
 			return "redirect:/vets.html";
