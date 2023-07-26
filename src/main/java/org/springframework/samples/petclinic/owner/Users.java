@@ -24,7 +24,7 @@ public class Users {
 
 	@Override
 	public String toString() {
-		return "Employee [id=" + id + ", name=" + name + ", age=" + age + "]";
+		return "Users [id=" + id + ", name=" + name + ", age=" + age + "]";
 	}
 
 	public Users(int id, String name, int age) {

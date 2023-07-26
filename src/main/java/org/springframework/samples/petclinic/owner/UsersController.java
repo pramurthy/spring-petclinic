@@ -18,7 +18,7 @@ public class UsersController {
 
 	Logger logger = LoggerFactory.getLogger(UsersController.class);
 
-	@GetMapping("/empexception")
+	@GetMapping("/userexception")
 	public String saveUsers(Model model) {
 		Users users = new Users(0, "Snappy", 23);
 		try {

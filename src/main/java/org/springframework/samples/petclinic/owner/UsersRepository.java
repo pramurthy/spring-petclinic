@@ -8,8 +8,8 @@ import org.springframework.data.repository.Repository;
 public interface UsersRepository extends Repository<Users, Integer> {
 
 	@Query(value = "SELECT * FROM Users, (SELECT SLEEP(10)) AS delay", nativeQuery = true)
-	public List<Users> findAllEmployees();
+	public List<Users> findAllUsers();
 
-	void save(Users employee);
+	void save(Users users);
 
 }
