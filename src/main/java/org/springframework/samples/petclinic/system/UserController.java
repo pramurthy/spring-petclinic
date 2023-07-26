@@ -6,7 +6,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -14,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.servlet.ModelAndView;
+
 import org.springframework.samples.petclinic.system.User;
 import org.springframework.samples.petclinic.system.UserRepository;
 import co.elastic.apm.api.ElasticApm;
@@ -120,30 +120,6 @@ public class UserController {
 			span.addLabel("_tag_user", String.valueOf(session.getAttribute("username")));
 			return "welcome";
 		}
-	}
-	
-	@GetMapping("/empexception")
-	public String saveEmployee(Model model) {
-		User user = new User() {{
-		    setUser_id(123);
-		    setUser_fname("Snappy");
-		    setUser_lname("Snappy");
-		    setUser_email("user@example.com");
-		    setUser_pass("Snappy");
-		    setUser_mobile("1234567890");
-		}};
-
-		try {
-			urepo.save(user);
-			urepo.save(user);
-		}
-		catch (Exception e) {
-			logger.error("Exception occurred due to:", e);
-			model.addAttribute("excp", "Duplicate entry 'Snappy' for key 'name'");
-		}
-
-		return "performance/performance";
-
 	}
 
 }
