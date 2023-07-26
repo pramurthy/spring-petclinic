@@ -9,7 +9,7 @@ import jakarta.persistence.Table;
 
 @Entity
 @Table
-public class Employee {
+public class Users {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,14 +27,14 @@ public class Employee {
 		return "Employee [id=" + id + ", name=" + name + ", age=" + age + "]";
 	}
 
-	public Employee(int id, String name, int age) {
+	public Users(int id, String name, int age) {
 		super();
 		this.id = id;
 		this.name = name;
 		this.age = age;
 	}
 
-	public Employee() {
+	public Users() {
 		super();
 		// TODO Auto-generated constructor stub
 	}

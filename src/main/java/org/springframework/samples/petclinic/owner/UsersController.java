@@ -7,23 +7,23 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
 @Controller
-public class EmployeeController {
+public class UsersController {
 
-	private final EmployeeRepository employeeRepository;
+	private final UsersRepository usersRepository;
 
-	public EmployeeController(EmployeeRepository employeeRepository) {
+	public UsersController(UsersRepository usersRepository) {
 		super();
-		this.employeeRepository = employeeRepository;
+		this.usersRepository = usersRepository;
 	}
 
-	Logger logger = LoggerFactory.getLogger(EmployeeController.class);
+	Logger logger = LoggerFactory.getLogger(UsersController.class);
 
 	@GetMapping("/empexception")
-	public String saveEmployee(Model model) {
-		Employee employee = new Employee(0, "Snappy", 23);
+	public String saveUsers(Model model) {
+		Users users = new Users(0, "Snappy", 23);
 		try {
-			employeeRepository.save(employee);
-			employeeRepository.save(employee);
+			usersRepository.save(users);
+			usersRepository.save(users);
 		}
 		catch (Exception e) {
 			logger.error("Exception occurred due to:", e);
