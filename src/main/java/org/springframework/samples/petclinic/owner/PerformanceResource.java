@@ -83,4 +83,14 @@ public class PerformanceResource {
 		return "performance/performance";
 	}
 
+
+
+	@GetMapping("/performance")
+	public String memoryLeakPage(HttpSession httpSession) {
+		if (httpSession.getAttribute("username") == null) {
+			return "login";
+		}
+		return "performance/performance";
+	}
+
 }
