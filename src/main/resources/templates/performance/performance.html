@@ -1,0 +1,11 @@
+<html xmlns:th="https://www.thymeleaf.org" th:replace="~{fragments/layout :: layout (~{::body},'performance')}">
+
+<head>
+<meta charset="ISO-8859-1">
+<title>Insert title here</title>
+</head>
+<body>
+<button>
+	<a th:href="@{/userexception}" class="my-link" title="Generate DB exception">Online Consultation</a></button> <span th:text="${excp}"></span> <br>
+</body>
+</html>
