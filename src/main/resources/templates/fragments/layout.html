@@ -57,9 +57,9 @@
             <span class="fa fa-clock-o" aria-hidden="true"></span>
             <span>Veterenerians</span>
           </li>
-          <li th:replace="~{::menuItem ('/oups','error','trigger a RuntimeException to see how it is handled','exclamation-triangle','Error')}">
+          <li th:replace="~{::menuItem ('/oups','error','trigger a RuntimeException to see how it is handled','exclamation-triangle','faq')}">
             <span class="fa exclamation-triangle" aria-hidden="true"></span>
-            <span>Error</span>
+            <span>faq</span>
           </li>
              <li th:replace="~{::menuItem ('/performance','performance','Performance Issues','fas fa-info-circle','Book Appointment')}">
             <span class="fas fa-info-circle" aria-hidden="true"></span>
@@ -68,7 +68,14 @@
           <li th:replace="~{::menuItem ('/about','intro','Introduction','fas fa-users','About')}">
             <span class="fas fa-users" aria-hidden="true"></span>
             <span>About</span>
-          </li>    
+          </li>   
+          <li th:replace="~{::menuItem ('/process','process','DeadLock Situation','fas fa-envelope','Contact Us')}">
+
+            <span class="fas fa-envelope" aria-hidden="true"></span>
+
+            <span>About Us</span>
+
+          </li> 
           </ul>
           <ul class="nav navbar-nav navbar-right">
           <li id="logout" th:replace="~{::menuItem ('/logout','logout','Logout from current session','lock','Logout')}">
