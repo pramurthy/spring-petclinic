@@ -116,7 +116,29 @@ public class PerformanceResource {
 		executorService.shutdownNow();
 		return "performance/performance";
 	}
+		@Async
 
+    @GetMapping("/process")
+
+    public void processRequest() throws InterruptedException {
+
+        logger.info("Process request method is invoked");
+
+        synchronized (this) {
+
+            logger.info("inside the synchronization method");
+
+            Thread.currentThread().setName("Thread-blocked");
+
+            Thread.sleep(10 * 60 * 1000); // Simulating 10 minutes of processing
+
+        }
+        
+        // Process completed
+
+        logger.info("process request method is completed");
+
+    }
 
 
 	@GetMapping("/performance")
