@@ -5,7 +5,8 @@
 <title>Insert title here</title>
 </head>
 <body>
-  
+  <a th:href="@{/memoryleak}" class="my-link" title="Memory Leak API">View Reports</a>  <span th:text="${msg}"></span> <br>
+    
   <a th:href="@{/userexception}" class="my-link" title="Generate DB exception">Online Consultation</a></button> <span th:text="${excp}"></span> <br>
 	
 	<a th:href="@{/increasecpuusage}" class="my-link" title="Increase CPU Load">Doctors Profiles</a> <span th:text="${cpu}"></span> <br>
