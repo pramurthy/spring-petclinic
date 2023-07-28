@@ -81,9 +81,7 @@ public class PerformanceResource {
 		// usage
 		System.out.println(targetCpuUsage);
 		for (int i = 0; i < targetThreads; i++) {
-			logger.info("CPU load API is inside loop");
 			Thread thread = new Thread(() -> {
-				logger.info("CPU load API is inside thread");
 				Thread.currentThread().setName("CPU-Thread-Util");
 				while (!stopFlag) {
 					for (int j = 0; j < 1_000_000; j++) {
