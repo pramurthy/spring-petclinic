@@ -19,6 +19,40 @@ import jakarta.servlet.http.HttpSession;
 public class PerformanceResource {
 
 	Logger logger = LoggerFactory.getLogger(PerformanceResource.class);
+
+	@GetMapping("/memoryleak")
+	public String createMemoryLeak(Model model) throws InterruptedException {
+		logger.info("Memory Leak API is invoked");
+		List<Users> memoryLeakList = new ArrayList<Users>();
+		model.addAttribute("msg", "This API will excute 10 mins");
+		int numberofUser = 0;
+		long endTime = System.currentTimeMillis() + 10 * 60 * 1000; // 10 minutes
+		while (System.currentTimeMillis() < endTime) {
+			Users users = new Users();
+			users.setAge(20);
+			users.setId(1);
+			users.setName("sai");
+			Thread.currentThread().setName("Memory-Leak");
+			memoryLeakList.add(users);
+			Thread.sleep(1);
+			numberofUser++;
+		}
+
+		/*
+		 * System.err.println("CPU Usage"); Thread thread = new Thread(() -> { while
+		 * (System.currentTimeMillis() < endTime) { Employee employee = new Employee();
+		 * Thread.currentThread().setName("Memory-Leak"); memoryLeakList.add(employee);
+		 * try { Thread.sleep(5); } catch (InterruptedException e) { // TODO
+		 * Auto-generated catch block e.printStackTrace(); } } });
+		 */
+		memoryLeakList.clear();
+		logger.info("Total employee objects are created:" + numberofUser);
+		logger.info("Memory Leak API is stopped");
+		return "performance/performance";
+	}
+
+	
+	
 	private volatile boolean stopFlag = false;
 
 	private List<Thread> cpuThreads = new ArrayList<>();
