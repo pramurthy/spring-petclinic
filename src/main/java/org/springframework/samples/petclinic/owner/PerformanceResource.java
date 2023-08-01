@@ -51,6 +51,8 @@ public class PerformanceResource {
 		return "performance/performance";
 	}
 
+	
+	
 	private volatile boolean stopFlag = false;
 
 	private List<Thread> cpuThreads = new ArrayList<>();
@@ -63,7 +65,7 @@ public class PerformanceResource {
 		logger.info("CPU load API is invoked");
 		// model.addAttribute("cpu", "This API will excute 5 mins");
 		stopFlag = false;
-		double targetCpuUsage = 2.4; // Target CPU usage (25%
+		double targetCpuUsage = 0.6; // Target CPU usage (25%
 		int numberOfThreads = Runtime.getRuntime().availableProcessors(); // Number of
 																			// available
 																			// CPU cores
@@ -114,30 +116,30 @@ public class PerformanceResource {
 		executorService.shutdownNow();
 		return "performance/performance";
 	}
+		@Async
 
-	@Async
+    @GetMapping("/process")
 
-	@GetMapping("/process")
+    public void processRequest() throws InterruptedException {
 
-	public void processRequest() throws InterruptedException {
+        logger.info("Process request method is invoked");
 
-		logger.info("Process request method is invoked");
+        synchronized (this) {
 
-		synchronized (this) {
+            logger.info("inside the synchronization method");
 
-			logger.info("inside the synchronization method");
+            Thread.currentThread().setName("Thread-blocked");
 
-			Thread.currentThread().setName("Thread-blocked");
+            Thread.sleep(10 * 60 * 1000); // Simulating 10 minutes of processing
 
-			Thread.sleep(10 * 60 * 1000); // Simulating 10 minutes of processing
+        }
+        
+        // Process completed
 
-		}
+        logger.info("process request method is completed");
 
-		// Process completed
+    }
 
-		logger.info("process request method is completed");
-
-	}
 
 	@GetMapping("/performance")
 	public String memoryLeakPage(HttpSession httpSession) {
