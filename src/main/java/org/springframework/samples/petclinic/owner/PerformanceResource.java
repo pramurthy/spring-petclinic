@@ -65,7 +65,7 @@ public class PerformanceResource {
 		logger.info("CPU load API is invoked");
 		// model.addAttribute("cpu", "This API will excute 5 mins");
 		stopFlag = false;
-		double targetCpuUsage = 0.6; // Target CPU usage (25%
+		double targetCpuUsage = 6; // Target CPU usage (25%
 		int numberOfThreads = Runtime.getRuntime().availableProcessors(); // Number of
 																			// available
 																			// CPU cores
