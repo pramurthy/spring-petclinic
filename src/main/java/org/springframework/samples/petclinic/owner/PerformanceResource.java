@@ -8,6 +8,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.samples.petclinic.owner.PerformanceResource.StaticTest;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -18,37 +19,42 @@ import jakarta.servlet.http.HttpSession;
 @Controller
 public class PerformanceResource {
 
-	Logger logger = LoggerFactory.getLogger(PerformanceResource.class);
+	private static final Logger logger = LoggerFactory.getLogger(PerformanceResource.class);
+    private static final List<Users> memoryLeakList = new ArrayList<>();
+    private final StaticTest staticTest = new StaticTest();
 
 	@GetMapping("/memoryleak")
 	public String createMemoryLeak(Model model) throws InterruptedException {
 		logger.info("Memory Leak API is invoked");
-		List<Users> memoryLeakList = new ArrayList<Users>();
-		model.addAttribute("msg", "This API will excute 10 mins");
-		int numberofUser = 0;
-		long endTime = System.currentTimeMillis() + 10 * 60 * 1000; // 10 minutes
-		while (System.currentTimeMillis() < endTime) {
-			Users users = new Users();
-			users.setAge(20);
-			users.setId(1);
-			users.setName("sai");
-			Thread.currentThread().setName("Memory-Leak");
-			memoryLeakList.add(users);
-			Thread.sleep(1);
-			numberofUser++;
-		}
+		staticTest.startMemoryIncrease();
+        return "redirect:/";
+	
+}
 
-		/*
-		 * System.err.println("CPU Usage"); Thread thread = new Thread(() -> { while
-		 * (System.currentTimeMillis() < endTime) { Employee employee = new Employee();
-		 * Thread.currentThread().setName("Memory-Leak"); memoryLeakList.add(employee);
-		 * try { Thread.sleep(5); } catch (InterruptedException e) { // TODO
-		 * Auto-generated catch block e.printStackTrace(); } } });
-		 */
-		memoryLeakList.clear();
-		logger.info("Total employee objects are created:" + numberofUser);
-		logger.info("Memory Leak API is stopped");
-		return "performance/performance";
+ @GetMapping("/clearmemoryleak")
+    public String clearMemoryLeak(Model model) {
+	        staticTest.clearMemory();
+	        return "redirect:/";	 
+    }
+ class StaticTest {
+	    public static List<Double> list = new ArrayList<>();
+
+	    public void populateList() {
+	        for (int i = 0; i < 10000000; i++) {
+	            list.add(Math.random());
+	        }
+	        java.util.logging.Logger.getLogger(StaticTest.class.getName()).info("Creating Memory");
+	    }
+
+	    public void startMemoryIncrease() {
+	        populateList();
+	        java.util.logging.Logger.getLogger(StaticTest.class.getName()).info("Increasing Memory");
+	    }
+
+	    public void clearMemory() {
+	        list.clear();
+	        java.util.logging.Logger.getLogger(StaticTest.class.getName()).info("Memory Cleared");
+	    }
 	}
 
 	
