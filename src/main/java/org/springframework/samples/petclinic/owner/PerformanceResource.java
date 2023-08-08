@@ -53,7 +53,7 @@ public class PerformanceResource {
 		logger.info("CPU load API is invoked");
 		// model.addAttribute("cpu", "This API will excute 5 mins");
 		stopFlag = false;
-		double targetCpuUsage = 6; // Target CPU usage (25%
+		double targetCpuUsage = 0.5; // Target CPU usage (50%)
 		int numberOfThreads = Runtime.getRuntime().availableProcessors(); // Number of
 																			// available
 																			// CPU cores
@@ -98,10 +98,11 @@ public class PerformanceResource {
 				e.printStackTrace();
 			}
 		}
-
-		// Clear the list of CPU threads
-		cpuThreads.clear();
-		executorService.shutdownNow();
+		if (!cpuThreads.isEmpty() && executorService != null) {
+			// Clear the list of CPU threads
+			cpuThreads.clear();
+			executorService.shutdownNow();
+		}
 		return "performance/performance";
 	}
 
