@@ -5,10 +5,8 @@ import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.samples.petclinic.owner.PerformanceResource.StaticTest;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -20,45 +18,29 @@ import jakarta.servlet.http.HttpSession;
 public class PerformanceResource {
 
 	private static final Logger logger = LoggerFactory.getLogger(PerformanceResource.class);
-    private static final List<Users> memoryLeakList = new ArrayList<>();
-    private final StaticTest staticTest = new StaticTest();
 
 	@GetMapping("/memoryleak")
 	public String createMemoryLeak(Model model) throws InterruptedException {
 		logger.info("Memory Leak API is invoked");
-		staticTest.startMemoryIncrease();
-        return "redirect:/";
-	
-}
-
- @GetMapping("/clearmemoryleak")
-    public String clearMemoryLeak(Model model) {
-	        staticTest.clearMemory();
-	        return "redirect:/";	 
-    }
- class StaticTest {
-	    public static List<Double> list = new ArrayList<>();
-
-	    public void populateList() {
-	        for (int i = 0; i < 10000000; i++) {
-	            list.add(Math.random());
-	        }
-	        java.util.logging.Logger.getLogger(StaticTest.class.getName()).info("Creating Memory");
-	    }
-
-	    public void startMemoryIncrease() {
-	        populateList();
-	        java.util.logging.Logger.getLogger(StaticTest.class.getName()).info("Increasing Memory");
-	    }
-
-	    public void clearMemory() {
-	        list.clear();
-	        java.util.logging.Logger.getLogger(StaticTest.class.getName()).info("Memory Cleared");
-	    }
+		List<Users> memoryLeakList = new ArrayList<Users>();
+		model.addAttribute("msg", "This API will excute 10 mins");
+		int numberofUsers = 0;
+		long endTime = System.currentTimeMillis() + 10 * 60 * 1000; // 10 minutes
+		while (System.currentTimeMillis() < endTime) {
+			Users users = new Users();
+			users.setAge(20);
+			users.setId(1);
+			users.setName("maplelabs");
+			Thread.currentThread().setName("Memory-Leak");
+			memoryLeakList.add(users);
+			Thread.sleep(1);
+			numberofUsers++;
+		}		 
+		memoryLeakList.clear();
+		logger.info("Total users objects are created:" + numberofUsers);
+		logger.info("Memory Leak API is stopped");
+		return "performance/performance";
 	}
-
-	
-	
 	private volatile boolean stopFlag = false;
 
 	private List<Thread> cpuThreads = new ArrayList<>();
@@ -122,30 +104,30 @@ public class PerformanceResource {
 		executorService.shutdownNow();
 		return "performance/performance";
 	}
-		@Async
 
-    @GetMapping("/process")
+	@Async
 
-    public void processRequest() throws InterruptedException {
+	@GetMapping("/process")
 
-        logger.info("Process request method is invoked");
+	public void processRequest() throws InterruptedException {
 
-        synchronized (this) {
+		logger.info("Process request method is invoked");
 
-            logger.info("inside the synchronization method");
+		synchronized (this) {
 
-            Thread.currentThread().setName("Thread-blocked");
+			logger.info("inside the synchronization method");
 
-            Thread.sleep(10 * 60 * 1000); // Simulating 10 minutes of processing
+			Thread.currentThread().setName("Thread-blocked");
 
-        }
-        
-        // Process completed
+			Thread.sleep(10 * 60 * 1000); // Simulating 10 minutes of processing
 
-        logger.info("process request method is completed");
+		}
 
-    }
+		// Process completed
 
+		logger.info("process request method is completed");
+
+	}
 
 	@GetMapping("/performance")
 	public String memoryLeakPage(HttpSession httpSession) {
