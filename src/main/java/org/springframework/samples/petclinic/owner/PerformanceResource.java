@@ -21,26 +21,37 @@ public class PerformanceResource {
 
 	@GetMapping("/memoryleak")
 	public String createMemoryLeak(Model model) throws InterruptedException {
-		logger.info("Memory Leak API is invoked");
-		List<Users> memoryLeakList = new ArrayList<Users>();
-		model.addAttribute("msg", "This API will excute 10 mins");
-		int numberofUsers = 0;
-		long endTime = System.currentTimeMillis() + 10 * 60 * 1000; // 10 minutes
-		while (System.currentTimeMillis() < endTime) {
-			Users users = new Users();
-			users.setAge(20);
-			users.setId(1);
-			users.setName("maplelabs");
-			Thread.currentThread().setName("Memory-Leak");
-			memoryLeakList.add(users);
-			Thread.sleep(1);
-			numberofUsers++;
-		}		 
-		memoryLeakList.clear();
-		logger.info("Total users objects are created:" + numberofUsers);
-		logger.info("Memory Leak API is stopped");
-		return "performance/performance";
+	    logger.info("Memory Leak API is invoked");
+	    List<List<Users>> memoryLeakList = new ArrayList<>();
+	    model.addAttribute("msg", "This API will execute 10 mins");
+	    int numberOfLists = 0;
+	    long endTime = System.currentTimeMillis() + 10 * 60 * 1000; // 10 minutes
+
+	    while (System.currentTimeMillis() < endTime) {
+	        List<Users> usersList = new ArrayList<>();
+	        for (int i = 0; i < 100; i++) { // Create 100 objects in each inner list
+	            Users users = new Users();
+	            users.setAge(20);
+	            users.setId(1);
+	            users.setName("maplelabs");
+	            usersList.add(users);
+	        }
+	        memoryLeakList.add(usersList);
+	        numberOfLists++;
+	        
+	        if (numberOfLists % 10 == 0) { // Clear every 10 inner lists to maintain consistency
+	            memoryLeakList.subList(0, 5).clear();
+	        }
+	        
+	        Thread.sleep(1);
+	    }
+
+	    memoryLeakList.clear();
+	    logger.info("Total lists created: " + numberOfLists);
+	    logger.info("Memory Leak API is stopped");
+	    return "performance/performance";
 	}
+
 	private volatile boolean stopFlag = false;
 
 	private List<Thread> cpuThreads = new ArrayList<>();
