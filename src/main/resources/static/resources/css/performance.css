@@ -1,0 +1,16 @@
+a.my-link {
+    display: inline-block;
+    padding: 10px 15px;
+    background-color: #f2f2f2;
+    color: #333;
+    text-decoration: none;
+    border-radius: 5px;
+    margin: 5px;
+}
+
+a.my-link:hover {
+    background-color: #ddd;
+}
+a{
+	color: red;
+}

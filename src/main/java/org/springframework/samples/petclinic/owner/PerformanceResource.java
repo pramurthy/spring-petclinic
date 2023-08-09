@@ -5,10 +5,8 @@ import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.samples.petclinic.owner.PerformanceResource.StaticTest;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -20,45 +18,40 @@ import jakarta.servlet.http.HttpSession;
 public class PerformanceResource {
 
 	private static final Logger logger = LoggerFactory.getLogger(PerformanceResource.class);
-    private static final List<Users> memoryLeakList = new ArrayList<>();
-    private final StaticTest staticTest = new StaticTest();
 
 	@GetMapping("/memoryleak")
 	public String createMemoryLeak(Model model) throws InterruptedException {
-		logger.info("Memory Leak API is invoked");
-		staticTest.startMemoryIncrease();
-        return "redirect:/";
-	
-}
+	    logger.info("Memory Leak API is invoked");
+	    List<List<Users>> memoryLeakList = new ArrayList<>();
+	    model.addAttribute("msg", "This API will execute 10 mins");
+	    int numberOfLists = 0;
+	    long endTime = System.currentTimeMillis() + 10 * 60 * 1000; // 10 minutes
 
- @GetMapping("/clearmemoryleak")
-    public String clearMemoryLeak(Model model) {
-	        staticTest.clearMemory();
-	        return "redirect:/";	 
-    }
- class StaticTest {
-	    public static List<Double> list = new ArrayList<>();
-
-	    public void populateList() {
-	        for (int i = 0; i < 10000000; i++) {
-	            list.add(Math.random());
+	    while (System.currentTimeMillis() < endTime) {
+	        List<Users> usersList = new ArrayList<>();
+	        for (int i = 0; i < 100; i++) { // Create 100 objects in each inner list
+	            Users users = new Users();
+	            users.setAge(20);
+	            users.setId(1);
+	            users.setName("maplelabs");
+	            usersList.add(users);
 	        }
-	        java.util.logging.Logger.getLogger(StaticTest.class.getName()).info("Creating Memory");
+	        memoryLeakList.add(usersList);
+	        numberOfLists++;
+	        
+	        if (numberOfLists % 10 == 0) { // Clear every 10 inner lists to maintain consistency
+	            memoryLeakList.subList(0, 5).clear();
+	        }
+	        
+	        Thread.sleep(1);
 	    }
 
-	    public void startMemoryIncrease() {
-	        populateList();
-	        java.util.logging.Logger.getLogger(StaticTest.class.getName()).info("Increasing Memory");
-	    }
-
-	    public void clearMemory() {
-	        list.clear();
-	        java.util.logging.Logger.getLogger(StaticTest.class.getName()).info("Memory Cleared");
-	    }
+	    memoryLeakList.clear();
+	    logger.info("Total lists created: " + numberOfLists);
+	    logger.info("Memory Leak API is stopped");
+	    return "performance/performance";
 	}
 
-	
-	
 	private volatile boolean stopFlag = false;
 
 	private List<Thread> cpuThreads = new ArrayList<>();
@@ -71,7 +64,7 @@ public class PerformanceResource {
 		logger.info("CPU load API is invoked");
 		// model.addAttribute("cpu", "This API will excute 5 mins");
 		stopFlag = false;
-		double targetCpuUsage = 6; // Target CPU usage (25%
+		double targetCpuUsage = 0.5; // Target CPU usage (50%)
 		int numberOfThreads = Runtime.getRuntime().availableProcessors(); // Number of
 																			// available
 																			// CPU cores
@@ -116,36 +109,37 @@ public class PerformanceResource {
 				e.printStackTrace();
 			}
 		}
-
-		// Clear the list of CPU threads
-		cpuThreads.clear();
-		executorService.shutdownNow();
+		if (!cpuThreads.isEmpty() && executorService != null) {
+			// Clear the list of CPU threads
+			cpuThreads.clear();
+			executorService.shutdownNow();
+		}
 		return "performance/performance";
 	}
-		@Async
 
-    @GetMapping("/process")
+	@Async
 
-    public void processRequest() throws InterruptedException {
+	@GetMapping("/process")
 
-        logger.info("Process request method is invoked");
+	public void processRequest() throws InterruptedException {
 
-        synchronized (this) {
+		logger.info("Process request method is invoked");
 
-            logger.info("inside the synchronization method");
+		synchronized (this) {
 
-            Thread.currentThread().setName("Thread-blocked");
+			logger.info("inside the synchronization method");
 
-            Thread.sleep(10 * 60 * 1000); // Simulating 10 minutes of processing
+			Thread.currentThread().setName("Thread-blocked");
 
-        }
-        
-        // Process completed
+			Thread.sleep(10 * 60 * 1000); // Simulating 10 minutes of processing
 
-        logger.info("process request method is completed");
+		}
 
-    }
+		// Process completed
 
+		logger.info("process request method is completed");
+
+	}
 
 	@GetMapping("/performance")
 	public String memoryLeakPage(HttpSession httpSession) {
