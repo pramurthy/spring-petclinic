@@ -37,18 +37,30 @@ public class PerformanceResource {
 		 * 120MB in bytes
 		 */ // long initialHeapSize = Runtime.getRuntime().totalMemory();
 		memoryLeakList.clear();
-
+		memroyLeak = new Thread(()->{
 		List<Object> memoryLeakList = new ArrayList<>();
 		int i = 0;
 		Thread.currentThread().setName("Pet-MemoryLeak");
 		while (i <= 110) {
 			memoryLeakList.add(new byte[1024 * 1024]);
-			Thread.sleep(5);
+			try {
+				Thread.sleep(5);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
 			i++;
 		}
-		Thread.sleep(600000);
+		try {
+			Thread.sleep(600000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		executorService = Executors.newSingleThreadScheduledExecutor();
+		executorService.schedule(this::stopCpuUsage, 10, TimeUnit.MINUTES);
 		memoryLeakList.clear();
 		System.gc();
+		} );
+		memroyLeak.start();
 		return "performance/performance";
 	}
 
