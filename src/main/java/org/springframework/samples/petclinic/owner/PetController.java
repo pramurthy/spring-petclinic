@@ -15,6 +15,7 @@
  */
 package org.springframework.samples.petclinic.owner;
 
+import java.time.LocalDate;
 import java.util.Collection;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -66,13 +67,23 @@ class PetController {
 
 	@ModelAttribute("owner")
 	public Owner findOwner(@PathVariable("ownerId") int ownerId) {
-		return this.owners.findById(ownerId);
+
+		Owner owner = this.owners.findById(ownerId);
+		if (owner == null) {
+			throw new IllegalArgumentException("Owner ID not found: " + ownerId);
+		}
+		return owner;
 	}
 
 	@ModelAttribute("pet")
 	public Pet findPet(@PathVariable("ownerId") int ownerId,
 			@PathVariable(name = "petId", required = false) Integer petId) {
-		return petId == null ? new Pet() : this.owners.findById(ownerId).getPet(petId);
+
+		Owner owner = this.owners.findById(ownerId);
+		if (owner == null) {
+			throw new IllegalArgumentException("Owner ID not found: " + ownerId);
+		}
+		return petId == null ? new Pet() : owner.getPet(petId);
 	}
 
 	@InitBinder("owner")
@@ -117,6 +128,11 @@ class PetController {
 			result.rejectValue("name", "duplicate", "already exists");
 		}
 
+		LocalDate currentDate = LocalDate.now();
+		if (pet.getBirthDate() != null && pet.getBirthDate().isAfter(currentDate)) {
+			result.rejectValue("birthDate", "typeMismatch.birthDate");
+		}
+
 		owner.addPet(pet);
 		if (result.hasErrors()) {
 			model.put("pet", pet);
@@ -157,6 +173,7 @@ class PetController {
 		}
 		Span span = ElasticApm.currentSpan();
 		span.addLabel("_tag_user", String.valueOf(session.getAttribute("username")));
+
 		if (result.hasErrors()) {
 			model.put("pet", pet);
 			logger.error("Error is updating Pet details");
