@@ -17,7 +17,9 @@ package org.springframework.samples.petclinic.owner;
 
 import java.util.List;
 import java.util.Map;
-
+import java.lang.String;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -31,8 +33,13 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.servlet.ModelAndView;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import co.elastic.apm.api.ElasticApm;
+import co.elastic.apm.api.CaptureSpan;
+import co.elastic.apm.api.Span;
 import jakarta.validation.Valid;
 
 /**
@@ -47,6 +54,8 @@ class OwnerController {
 	private static final String VIEWS_OWNER_CREATE_OR_UPDATE_FORM = "owners/createOrUpdateOwnerForm";
 
 	private final OwnerRepository owners;
+
+	Logger logger = LoggerFactory.getLogger(OwnerController.class);
 
 	public OwnerController(OwnerRepository clinicService) {
 		this.owners = clinicService;
@@ -63,46 +72,84 @@ class OwnerController {
 	}
 
 	@GetMapping("/owners/new")
-	public String initCreationForm(Map<String, Object> model) {
+	@CaptureSpan
+	public String initCreationForm(HttpSession session, Map<String, Object> model) {
+		if (session.getAttribute("username") == null) {
+			return "login";
+		}
 		Owner owner = new Owner();
 		model.put("owner", owner);
+		logger.info("User:" + session.getAttribute("username") + " made the request GET /owners/new");
+		logger.info("Create or Update form rendered");
 		return VIEWS_OWNER_CREATE_OR_UPDATE_FORM;
 	}
 
 	@PostMapping("/owners/new")
-	public String processCreationForm(@Valid Owner owner, BindingResult result) {
+	@CaptureSpan
+	public String processCreationForm(@RequestBody String requestBody, HttpSession session, @Valid Owner owner,
+			BindingResult result) {
+		logger.info("Request Body: " + requestBody);
+		if (session.getAttribute("username") == null) {
+			return "login";
+		}
 		if (result.hasErrors()) {
+			logger.error("Error in creating new owner");
 			return VIEWS_OWNER_CREATE_OR_UPDATE_FORM;
 		}
-
+		Span span = ElasticApm.currentSpan();
+		span.addLabel("_tag_user", String.valueOf(session.getAttribute("username")));
 		this.owners.save(owner);
+		logger.info("User:" + session.getAttribute("username") + " made the request POST /owners/new");
+		logger.info("New owner with owner id :" + owner.getId() + " created and added to database successfully");
+		logger.info("Fetching new owner details from db - /owners/" + owner.getId());
 		return "redirect:/owners/" + owner.getId();
 	}
 
 	@GetMapping("/owners/find")
-	public String initFindForm() {
+	@CaptureSpan
+	public String initFindForm(HttpSession session) {
+		if (session.getAttribute("username") == null) {
+			return "login";
+		}
+		Span span = ElasticApm.currentSpan();
+		span.addLabel("_tag_user", String.valueOf(session.getAttribute("username")));
+		logger.info("User:" + session.getAttribute("username") + " made the request  GET /owners/find");
+		logger.info("Find owner page is requested");
 		return "owners/findOwners";
 	}
 
 	@GetMapping("/owners")
-	public String processFindForm(@RequestParam(defaultValue = "1") int page, Owner owner, BindingResult result,
-			Model model) {
+	@CaptureSpan
+	public String processFindForm(HttpSession session, @RequestParam(defaultValue = "1") int page, Owner owner,
+			BindingResult result, Model model) {
+		if (session.getAttribute("username") == null) {
+			return "login";
+		}
+		Span span = ElasticApm.currentSpan();
+		span.addLabel("_tag_user", String.valueOf(session.getAttribute("username")));
+		logger.info("User:" + session.getAttribute("username") + " made the request  GET /owners");
 		// allow parameterless GET request for /owners to return all records
 		if (owner.getLastName() == null) {
 			owner.setLastName(""); // empty string signifies broadest possible search
 		}
-
+		else {
+			logger.info("User:" + session.getAttribute("username") + " requested the details of owner with lastname:"
+					+ owner.getLastName());
+		}
 		// find owners by last name
 		Page<Owner> ownersResults = findPaginatedForOwnersLastName(page, owner.getLastName());
 		if (ownersResults.isEmpty()) {
 			// no owners found
 			result.rejectValue("lastName", "notFound", "not found");
+			logger.info("No owners found in database");
+			logger.info("Redirecting to find owner page");
 			return "owners/findOwners";
 		}
-
+		logger.info("Number of owners in the database: " + ownersResults.getTotalElements());
 		if (ownersResults.getTotalElements() == 1) {
 			// 1 owner found
 			owner = ownersResults.iterator().next();
+			logger.info("Redirecting to /owners/" + owner.getId());
 			return "redirect:/owners/" + owner.getId();
 		}
 
@@ -123,25 +170,47 @@ class OwnerController {
 	private Page<Owner> findPaginatedForOwnersLastName(int page, String lastname) {
 		int pageSize = 5;
 		Pageable pageable = PageRequest.of(page - 1, pageSize);
+		if (lastname != "") {
+			logger.info("Searching for owner details with lastname:" + lastname);
+		}
 		return owners.findByLastName(lastname, pageable);
 	}
 
 	@GetMapping("/owners/{ownerId}/edit")
-	public String initUpdateOwnerForm(@PathVariable("ownerId") int ownerId, Model model) {
+	@CaptureSpan
+	public String initUpdateOwnerForm(HttpSession session, @PathVariable("ownerId") int ownerId, Model model) {
+		if (session.getAttribute("username") == null) {
+			return "login";
+		}
+		Span span = ElasticApm.currentSpan();
+		span.addLabel("_tag_user", String.valueOf(session.getAttribute("username")));
 		Owner owner = this.owners.findById(ownerId);
 		model.addAttribute(owner);
+		logger.info("User:" + session.getAttribute("username") + " made the request  GET /owners/" + ownerId + "/edit");
+		logger.info("Update owner form  for owner id " + ownerId + " is rendered");
 		return VIEWS_OWNER_CREATE_OR_UPDATE_FORM;
 	}
 
 	@PostMapping("/owners/{ownerId}/edit")
-	public String processUpdateOwnerForm(@Valid Owner owner, BindingResult result,
-			@PathVariable("ownerId") int ownerId) {
+	@CaptureSpan
+	public String processUpdateOwnerForm(@RequestBody String requestBody, HttpSession session, @Valid Owner owner,
+			BindingResult result, @PathVariable("ownerId") int ownerId) {
+		logger.info("Request Body " + requestBody);
+		if (session.getAttribute("username") == null) {
+			return "login";
+		}
+		Span span = ElasticApm.currentSpan();
+		span.addLabel("_tag_user", String.valueOf(session.getAttribute("username")));
 		if (result.hasErrors()) {
+			logger.error("Error occured in updating owner details");
 			return VIEWS_OWNER_CREATE_OR_UPDATE_FORM;
 		}
 
 		owner.setId(ownerId);
 		this.owners.save(owner);
+		logger
+			.info("User:" + session.getAttribute("username") + " made the request  POST /owners/" + ownerId + "/edit");
+		logger.info("Owner details with ownerId :" + ownerId + " updated sucessfully in db");
 		return "redirect:/owners/{ownerId}";
 	}
 
@@ -151,10 +220,15 @@ class OwnerController {
 	 * @return a ModelMap with the model attributes for the view
 	 */
 	@GetMapping("/owners/{ownerId}")
-	public ModelAndView showOwner(@PathVariable("ownerId") int ownerId) {
+	@CaptureSpan
+	public ModelAndView showOwner(HttpSession session, @PathVariable("ownerId") int ownerId) {
 		ModelAndView mav = new ModelAndView("owners/ownerDetails");
 		Owner owner = this.owners.findById(ownerId);
 		mav.addObject(owner);
+		Span span = ElasticApm.currentSpan();
+		span.addLabel("_tag_user", String.valueOf(session.getAttribute("username")));
+		logger.info("User:" + session.getAttribute("username") + " made the request  GET /owners/" + ownerId);
+		logger.info("Owner details for ownerId: " + ownerId + " rendered");
 		return mav;
 	}
 

@@ -1,0 +1,17 @@
+<html xmlns:th="https://www.thymeleaf.org" th:replace="~{fragments/layout :: layout (~{::body},'performance')}">
+
+<head>
+<meta charset="ISO-8859-1">
+<title>Insert title here</title>
+</head>
+<body>
+  <a th:href="@{/memoryleak}" class="my-link" title="Memory Leak API">View Reports</a>  <span th:text="${msg}"></span> <br>
+    
+  <a th:href="@{/userexception}" class="my-link" title="Generate DB exception">Online Consultation</a></button> <span th:text="${excp}"></span> <br>
+	
+	<a th:href="@{/increasecpuusage}" class="my-link" title="Increase CPU Load">Doctors Profiles</a> <span th:text="${cpu}"></span> <br>
+	
+	<a th:href="@{/stopcpuusage}" class="my-link" title="stop the CPU load">InPerson Consultation</a> <span th:text="${stop}"></span> <br>
+	
+</body>
+</html>

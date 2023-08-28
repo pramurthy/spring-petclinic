@@ -17,6 +17,14 @@ package org.springframework.samples.petclinic.system;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import co.elastic.apm.api.ElasticApm;
+import co.elastic.apm.api.CaptureSpan;
+import co.elastic.apm.api.Span;
+import java.lang.String;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 
 /**
  * Controller used to showcase what happens when an exception is thrown
@@ -28,8 +36,17 @@ import org.springframework.web.bind.annotation.GetMapping;
 @Controller
 class CrashController {
 
+	Logger logger = LoggerFactory.getLogger(CrashController.class);
+
 	@GetMapping("/oups")
-	public String triggerException() {
+	@CaptureSpan
+	public String triggerException(HttpSession session) {
+		if (session.getAttribute("username") != null) {
+			Span span = ElasticApm.currentSpan();
+			span.addLabel("_tag_user", String.valueOf(session.getAttribute("username")));
+		}
+		logger.info("GET /oups - Request called");
+		logger.error("Error occured in requested page");
 		throw new RuntimeException(
 				"Expected: controller used to showcase what " + "happens when an exception is thrown");
 	}
