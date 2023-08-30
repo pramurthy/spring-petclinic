@@ -23,6 +23,8 @@ public class PerformanceResource {
 	List<Users> memoryLeakList = new ArrayList<>();
 
 	private volatile boolean stopFlag = false;
+	
+	private volatile boolean memoryLeakRunning = false; // Flag to track whether memory leak is running
 
 	private ScheduledExecutorService executorService;
 
@@ -36,31 +38,37 @@ public class PerformanceResource {
 		 * 1000; // 10 minutes in milliseconds long targetHeapSize = 100 * 1024 * 1024; //
 		 * 120MB in bytes
 		 */ // long initialHeapSize = Runtime.getRuntime().totalMemory();
+		if (!memoryLeakRunning) { // Check if memory leak is not already running
+	        memoryLeakRunning = true; // Set the flag to indicate memory leak is running
 		memoryLeakList.clear();
-		memroyLeak = new Thread(()->{
-		List<Object> memoryLeakList = new ArrayList<>();
-		int i = 0;
-		Thread.currentThread().setName("Pet-MemoryLeak");
-		while (i <= 110) {
-			memoryLeakList.add(new byte[1024 * 1024]);
+		memroyLeak = new Thread(() -> {
+			List<Object> memoryLeakList = new ArrayList<>();
+			int i = 0;
+			Thread.currentThread().setName("Pet-MemoryLeak");
+			while (i <= 110) {
+				memoryLeakList.add(new byte[1024 * 1024]);
+				try {
+					Thread.sleep(5);
+				}
+				catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+				i++;
+			}
 			try {
-				Thread.sleep(5);
-			} catch (InterruptedException e) {
+				Thread.sleep(600000);
+			}
+			catch (InterruptedException e) {
 				e.printStackTrace();
 			}
-			i++;
-		}
-		try {
-			Thread.sleep(600000);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-		executorService = Executors.newSingleThreadScheduledExecutor();
-		executorService.schedule(this::stopCpuUsage, 10, TimeUnit.MINUTES);
-		memoryLeakList.clear();
-		System.gc();
-		} );
+			executorService = Executors.newSingleThreadScheduledExecutor();
+			executorService.schedule(this::stopCpuUsage, 10, TimeUnit.MINUTES);
+			memoryLeakList.clear();
+			System.gc();
+			memoryLeakRunning = false; // Reset the flag
+		});
 		memroyLeak.start();
+		}
 		return "performance/performance";
 	}
 
