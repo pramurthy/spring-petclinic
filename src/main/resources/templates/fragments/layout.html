@@ -19,7 +19,7 @@
 
   <link th:href="@{/webjars/font-awesome/4.7.0/css/font-awesome.min.css}" rel="stylesheet">
   <link rel="stylesheet" th:href="@{/resources/css/petclinic.css}" />
-
+  <link rel="stylesheet" th:href="@{/resources/css/performance.css}" />
 </head>
 
 <body>
@@ -45,7 +45,7 @@
 
         <ul class="nav navbar-nav me-auto">
 
-          <li th:replace="~{::menuItem ('/','home','home page','home','Home')}">
+          <li th:replace="~{::menuItem ('/home','home','home page','home','Home')}">
             <span class="fa fa-home" aria-hidden="true"></span>
             <span>Home</span>
           </li>
@@ -54,18 +54,38 @@
             <span class="fa fa-search" aria-hidden="true"></span>
             <span>Find owners</span>
           </li>
-
-          <li th:replace="~{::menuItem ('/vets.html','vets','veterinarians','th-list','Veterinarians')}">
-            <span class="fa fa-th-list" aria-hidden="true"></span>
-            <span>Veterinarians</span>
+          <li th:replace="~{::menuItem ('/slow','Veterinarians','Show the list of Veterenerians','clock-o','Veterinarians')}">
+            <span class="fa fa-clock-o" aria-hidden="true"></span>
+            <span>Veterenerians</span>
           </li>
-
-          <li
-            th:replace="~{::menuItem ('/oups','error','trigger a RuntimeException to see how it is handled','exclamation-triangle','Error')}">
+          <li th:replace="~{::menuItem ('/oups','error','trigger a RuntimeException to see how it is handled','exclamation-triangle','faq')}">
             <span class="fa exclamation-triangle" aria-hidden="true"></span>
-            <span>Error</span>
+            <span>faq</span>
           </li>
+             <li th:replace="~{::menuItem ('/performance','performance','Performance Issues','fas fa-info-circle','Book Appointment')}">
+            <span class="fas fa-info-circle" aria-hidden="true"></span>
+            <span>Book Appointment</span>
+          </li>
+          <!--<li th:replace="~{::menuItem ('/about','intro','Introduction','fas fa-users','About')}">
+            <span class="fas fa-users" aria-hidden="true"></span>
+            <span>About</span>
+          </li>  --> 
+          <li th:replace="~{::menuItem ('/process','process','DeadLock Situation','fas fa-envelope','Contact Us')}">
 
+            <span class="fas fa-envelope" aria-hidden="true"></span>
+
+            <span>About Us</span>
+
+          </li> 
+          </ul>
+          <ul class="nav navbar-nav navbar-right">
+          <li id="logout" th:replace="~{::menuItem ('/logout','logout','Logout from current session','lock','Logout')}">
+            <span class="fa exclamation-triangle" aria-hidden="true"></span>
+            <span>Logout</span>
+          </li>
+          <li id="user" th:replace="~{::menuItem ('/home','user','Username logged in','user',${session.username})}" th:align = "right" class="nav navbar-nav me-right">
+            <span>UserLogged in as</span>
+          </li>
         </ul>
       </div>
     </div>
@@ -88,7 +108,35 @@
   </div>
 
   <script th:src="@{/webjars/bootstrap/5.2.3/dist/js/bootstrap.bundle.min.js}"></script>
+  <script defer th:inline="javascript">
+  var baseUrl = [[${@environment.getProperty('BASE_URL')}]];
+  var profileKey = [[${@environment.getProperty('PROFILE_KEY')}]];
+  var serviceName = [[${@environment.getProperty('SERVICE_NAME')}]];
+  var projectName = [[${@environment.getProperty('PROJECT_NAME')}]];
+  var appName = [[${@environment.getProperty('APP_NAME')}]];
+  (function(d, s, c) {
+    var j = d.createElement(s),
+        t = d.getElementsByTagName(s)[0]
 
+    j.src = 'https://cdn.jsdelivr.net/npm/sf-apm-rum/dist/sf-apm-rum.js'
+    j.onload = function() {
+        let apmRum = new sfApm.ApmRum();
+        apmRum.init(c);
+    }
+    t.parentNode.insertBefore(j, t)
+    })(document, 'script', {
+        baseUrl,
+        profileKey,
+        serviceName,
+        projectName,
+        appName,
+        distributedTracing: false,
+        serviceVersion: "0.0.0", 
+        distributedTracing: false,
+        pageLoadTransactionName: '/',
+        breakdownMetrics: true,
+        session:true
+    }); 
+  </script>
 </body>
-
 </html>

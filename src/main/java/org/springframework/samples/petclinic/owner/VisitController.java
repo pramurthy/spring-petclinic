@@ -16,7 +16,8 @@
 package org.springframework.samples.petclinic.owner;
 
 import java.util.Map;
-
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.WebDataBinder;
@@ -25,7 +26,13 @@ import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-
+import org.springframework.web.bind.annotation.RequestBody;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import co.elastic.apm.api.ElasticApm;
+import co.elastic.apm.api.CaptureSpan;
+import co.elastic.apm.api.Span;
+import java.lang.String;
 import jakarta.validation.Valid;
 
 /**
@@ -39,6 +46,8 @@ import jakarta.validation.Valid;
 class VisitController {
 
 	private final OwnerRepository owners;
+
+	Logger logger = LoggerFactory.getLogger(VisitController.class);
 
 	public VisitController(OwnerRepository owners) {
 		this.owners = owners;
@@ -73,21 +82,43 @@ class VisitController {
 	// Spring MVC calls method loadPetWithVisit(...) before initNewVisitForm is
 	// called
 	@GetMapping("/owners/{ownerId}/pets/{petId}/visits/new")
-	public String initNewVisitForm() {
+	@CaptureSpan
+	public String initNewVisitForm(HttpSession session) {
+		if (session.getAttribute("username") == null) {
+			return "login";
+		}
+		Span span = ElasticApm.currentSpan();
+		span.addLabel("_tag_user", String.valueOf(session.getAttribute("username")));
+		logger.info("User:" + session.getAttribute("username")
+				+ " made the request  GET /owners/*/pets/{petId}/visits/new");
+		logger.info("Create or update visit form rendered");
 		return "pets/createOrUpdateVisitForm";
 	}
 
 	// Spring MVC calls method loadPetWithVisit(...) before processNewVisitForm is
 	// called
 	@PostMapping("/owners/{ownerId}/pets/{petId}/visits/new")
-	public String processNewVisitForm(@ModelAttribute Owner owner, @PathVariable int petId, @Valid Visit visit,
-			BindingResult result) {
+	@CaptureSpan
+	public String processNewVisitForm(@RequestBody String requestBody, HttpSession session, @ModelAttribute Owner owner,
+			@PathVariable int petId, @Valid Visit visit, BindingResult result) {
+		logger.info("Request Body: " + requestBody);
+		if (session.getAttribute("username") == null) {
+			return "login";
+		}
+		Span span = ElasticApm.currentSpan();
+		span.addLabel("_tag_user", String.valueOf(session.getAttribute("username")));
 		if (result.hasErrors()) {
+			logger.error("Error occured in creation/updation of visit for petId: " + petId);
+			logger.info("Create or updae visit form rendered");
 			return "pets/createOrUpdateVisitForm";
 		}
 
 		owner.addVisit(petId, visit);
 		this.owners.save(owner);
+		logger.info("User:" + session.getAttribute("username") + " made the request POST /owners/{ownerId}/pets/"
+				+ petId + "/visits/new");
+		logger.info("Visit created and added to the database successfully");
+		logger.info("Fetching updated owner details from db - /owners/" + owner.getId());
 		return "redirect:/owners/{ownerId}";
 	}
 
